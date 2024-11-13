@@ -41,10 +41,13 @@
 ## >>> EXPERIMENTAL ADDITION <<<
 > The Following **ONLY** works if you are using the Paper Fork of:
 > https://github.com/SparklyPower/SparklyPaper
+> 
 > Enables:
+> 
 > Multiworld-Threading (TLDR; Large Crafts will move without extensively lagging the main thread of the server.)
 > *In the* `config.yml`
-```IsMultithreaded: false```
+> 
+```IsMultithreaded: true/false```
 ## >>> EXPERIMENTAL ADDITION <<<
 
 
