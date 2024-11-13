@@ -47,6 +47,6 @@ commands:
   craftinfo:
     description: Get information on a piloted craft
     usage: /crafttype [player] [page]
-libraries:
-  - org.roaringbitmap:RoaringBitmap:1.0.6
-  - it.unimi.dsi:fastutil:8.5.13
+libraries: []
+#  - org.roaringbitmap:RoaringBitmap:1.0.6
+#  - it.unimi.dsi:fastutil:8.5.13
