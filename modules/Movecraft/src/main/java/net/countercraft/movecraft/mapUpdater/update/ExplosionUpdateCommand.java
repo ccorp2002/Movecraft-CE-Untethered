@@ -1,6 +1,5 @@
 package net.countercraft.movecraft.mapUpdater.update;
 
-import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.events.ExplosionEvent;
 import org.bukkit.Bukkit;

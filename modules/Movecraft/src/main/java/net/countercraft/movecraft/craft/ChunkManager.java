@@ -4,30 +4,19 @@ import net.countercraft.movecraft.MovecraftChunk;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.config.Settings;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import org.bukkit.plugin.Plugin;
 
 @Deprecated
 public class ChunkManager implements Listener {
@@ -258,7 +247,7 @@ public class ChunkManager implements Listener {
         }
         return Bukkit.getScheduler().callSyncMethod(PLUGIN, () -> {
             ChunkManager.addChunksToLoadAsync(chunks);
-            return true;
+            return (Boolean)true;
         });
     }
 

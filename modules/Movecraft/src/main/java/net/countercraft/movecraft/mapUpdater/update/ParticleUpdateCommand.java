@@ -3,8 +3,6 @@ package net.countercraft.movecraft.mapUpdater.update;
 import net.countercraft.movecraft.config.Settings;
 import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.entity.Player;
 
 import java.util.Random;
 

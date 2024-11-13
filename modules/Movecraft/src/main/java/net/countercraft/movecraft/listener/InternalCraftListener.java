@@ -2,19 +2,13 @@ package net.countercraft.movecraft.listener;
 
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.NPCCraftImpl;
-import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.events.CraftDetectEvent;
-import net.countercraft.movecraft.events.CraftPilotEvent;
 import net.countercraft.movecraft.events.CraftReleaseEvent;
-import org.bukkit.block.*;
-import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-
-import org.bukkit.event.world.AsyncStructureGenerateEvent;
-import org.bukkit.util.*;
 
 public class InternalCraftListener implements Listener {
 

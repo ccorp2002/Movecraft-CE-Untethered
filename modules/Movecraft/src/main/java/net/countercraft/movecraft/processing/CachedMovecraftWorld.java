@@ -2,8 +2,8 @@ package net.countercraft.movecraft.processing;
 
 import com.google.common.collect.MapMaker;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.WorldHandler;
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.WorldHandler;
 import net.countercraft.movecraft.support.AsyncChunk;
 import org.bukkit.Material;
 import org.bukkit.World;

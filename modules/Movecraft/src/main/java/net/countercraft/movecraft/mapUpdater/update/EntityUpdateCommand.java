@@ -17,23 +17,13 @@
 
 package net.countercraft.movecraft.mapUpdater.update;
 
+import net.countercraft.movecraft.MovecraftRotation;
+import net.countercraft.movecraft.util.TeleportUtils;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.util.TeleportUtils;
-import net.countercraft.movecraft.MovecraftRotation;
-import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.PlayerCraft;
-import net.countercraft.movecraft.craft.CraftManager;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.block.BlockFace;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Hanging;
 import org.bukkit.entity.Player;
-import org.bukkit.Bukkit;
 
 import java.util.Objects;
 

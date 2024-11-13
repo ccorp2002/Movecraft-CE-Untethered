@@ -1,34 +1,15 @@
 package net.countercraft.movecraft.util;
 
-import net.countercraft.movecraft.craft.PlayerCraftImpl;
-import net.countercraft.movecraft.craft.BaseCraft;
-import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.MovecraftLocation;
-import org.bukkit.Bukkit;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.CraftManager;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.GameRule;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
-import java.lang.reflect.Method;
-import java.util.function.Supplier;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryView;
 
 /**
  * Code taken with permission from MicleBrick

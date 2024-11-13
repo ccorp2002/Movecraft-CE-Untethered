@@ -290,6 +290,7 @@ public class MathUtils {
      * The resulting MovecraftRotation is based on an axis.
      * @param rotation the direction to rotate
      * @param movecraftLocation the location to rotate
+     * @param movecraftLocation the axis to rotate around.
      * @return a rotated Movecraft location
      */
     @NotNull

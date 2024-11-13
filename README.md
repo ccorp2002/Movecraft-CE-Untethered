@@ -41,35 +41,39 @@
 ## >>> EXPERIMENTAL ADDITION <<<
 > The Following **ONLY** works if you are using the Paper Fork of:
 > https://github.com/SparklyPower/SparklyPaper
+> 
 > Enables:
+> 
 > Multiworld-Threading (TLDR; Large Crafts will move without extensively lagging the main thread of the server.)
 > *In the* `config.yml`
-```IsMultithreaded: false```
+> 
+```IsMultithreaded: true/false```
 ## >>> EXPERIMENTAL ADDITION <<<
 
 
 
-
-
-[![Movecraft : Java CI](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions/workflows/maven.yml/badge.svg?branch=ce-main)](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions/workflows/maven.yml)
-
-
 This is **another** maintained fork of Movecraft, which aims to maintain compatibility with APDev/Mainstream-Movecraft as well as provide Performance Changes & Fixes, API Upgrades, Ticking/Updating Redstone Components.
 
-## Download
+## DOWNLOAD
 
-Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/releases).
+(Pre)Release Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/releases).
 
-Development builds can be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions?query=workflow%3A%22Java+CI%22).  Use at your own risk!
+Development builds will eventually be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions?query=workflow%3A%22Java+CI%22). 
+
+(Use at your own risk!)
 
 
-## Development Environment
+#### Movecraft is released under the GNU General Public License V3. 
 
-> Compiling this Version of Movecraft is a bit more involved due to the additional features & changes.
-> 
+# The following Guide is Incomplete.
+
+
+## Development Environment (Set-up Guide)
+
+> Compiling this Version of Movecraft is a bit more involved due to the additional features & changes, specific to certain paper versions & forks.
 > However, once the set-up process is complete, you will not need to repeat it again.
->
-### How To setup your development environment:
+> 
+### How To setup the development environment:
 - Compile yourself a copy of PaperMC for each of the MC Versions this supports.
 - You will need `1.20.4, 1.21.1, 1.21.3` at the time of writing this.
 - This can take a while, and be confusing. Suggest checking the Readme-section for of PaperMC over here [PaperMC](https://github.com/PaperMC/Paper)
@@ -80,5 +84,3 @@ Once you have put your compiled "server-<\version>" jars in the `libs` folder, r
 mvn clean install
 ```
 Compiled jars can be found in the `/target` directory.
-
-#### Movecraft is released under the GNU General Public License V3. 

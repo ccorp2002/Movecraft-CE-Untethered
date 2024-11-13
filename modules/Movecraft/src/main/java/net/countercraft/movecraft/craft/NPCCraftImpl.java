@@ -3,8 +3,8 @@ package net.countercraft.movecraft.craft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 public class NPCCraftImpl extends BaseCraft {

@@ -3,7 +3,6 @@ package net.countercraft.movecraft.processing.tasks.translation;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
 import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.events.CraftCollisionEvent;
 import net.countercraft.movecraft.events.CraftPreTranslateEvent;
@@ -22,7 +21,6 @@ import net.countercraft.movecraft.processing.tasks.translation.validators.HoverV
 import net.countercraft.movecraft.processing.tasks.translation.validators.MaxHeightValidator;
 import net.countercraft.movecraft.processing.tasks.translation.validators.MinHeightValidator;
 import net.countercraft.movecraft.processing.tasks.translation.validators.WorldBorderValidator;
-import net.countercraft.movecraft.util.Tags;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
 import net.countercraft.movecraft.util.hitboxes.SetHitBox;
 import net.kyori.adventure.text.Component;

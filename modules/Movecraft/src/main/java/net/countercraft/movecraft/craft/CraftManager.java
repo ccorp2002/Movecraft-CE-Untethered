@@ -19,164 +19,46 @@
 
 package net.countercraft.movecraft.craft;
 
-import org.bukkit.util.Vector;
-import org.bukkit.Axis;
-import org.bukkit.block.Banner;
-import org.bukkit.block.Beacon;
-import org.bukkit.block.Beehive;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.BrewingStand;
-import org.bukkit.block.Campfire;
-import org.bukkit.block.CommandBlock;
-import org.bukkit.block.Container;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.block.EndGateway;
-import org.bukkit.block.Furnace;
-import org.bukkit.block.Jukebox;
-import org.bukkit.block.Lectern;
-import org.bukkit.block.Lockable;
-import org.bukkit.block.Sign;
-import org.bukkit.block.Skull;
-import org.bukkit.block.Structure;
-import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.MultipleFacing;
-import org.bukkit.block.data.Orientable;
-import org.bukkit.block.data.Rail;
-import org.bukkit.block.data.Rotatable;
-import org.bukkit.block.data.Waterlogged;
-import org.bukkit.block.data.type.*;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.EntityType;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.BlockInventoryHolder;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Entity;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
+import net.countercraft.movecraft.WorldHandler;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.events.CraftPreTranslateEvent;
-import net.countercraft.movecraft.events.CraftPilotEvent;
-import net.countercraft.movecraft.events.CraftReleaseEvent;
-import net.countercraft.movecraft.events.CraftPreSinkEvent;
-import net.countercraft.movecraft.events.FuelBurnEvent;
-import net.countercraft.movecraft.events.CraftSinkEvent;
-import net.countercraft.movecraft.events.TypesReloadedEvent;
+import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
+import net.countercraft.movecraft.events.*;
 import net.countercraft.movecraft.exception.NonCancellableReleaseException;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.CachedMovecraftWorld;
 import net.countercraft.movecraft.processing.WorldManager;
 import net.countercraft.movecraft.processing.effects.Effect;
 import net.countercraft.movecraft.processing.functions.CraftSupplier;
 import net.countercraft.movecraft.processing.functions.Result;
-import net.countercraft.movecraft.craft.type.property.RequiredBlockProperty;
-import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
 import net.countercraft.movecraft.processing.tasks.detection.DetectionTask;
 import net.countercraft.movecraft.processing.tasks.detection.HitBoxDetectionTask;
-import net.countercraft.movecraft.processing.tasks.detection.UnsafeDetectionTask;
 import net.countercraft.movecraft.processing.tasks.detection.IgnoreDetectionTask;
-import net.countercraft.movecraft.async.rotation.RotationTask;
+import net.countercraft.movecraft.processing.tasks.detection.UnsafeDetectionTask;
+import net.countercraft.movecraft.util.CollectionUtils;
+import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.Pair;
 import net.countercraft.movecraft.util.Tags;
-import net.countercraft.movecraft.util.MathUtils;
-import net.countercraft.movecraft.util.CollectionUtils;
-import net.countercraft.movecraft.util.hitboxes.*;
+import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
+import net.countercraft.movecraft.util.hitboxes.HitBox;
+import net.countercraft.movecraft.util.hitboxes.SetHitBox;
+import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.Material;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.util.Vector;
-import org.bukkit.Axis;
-import org.bukkit.block.Banner;
-import org.bukkit.block.Beacon;
-import org.bukkit.block.Beehive;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.BrewingStand;
-import org.bukkit.block.Campfire;
-import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.block.EndGateway;
-import org.bukkit.block.Furnace;
-import org.bukkit.block.Jukebox;
-import org.bukkit.block.Lectern;
-import org.bukkit.block.Lockable;
 import org.bukkit.block.Sign;
-import org.bukkit.block.Skull;
-import org.bukkit.block.Structure;
-import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.MultipleFacing;
-import org.bukkit.block.data.Orientable;
-import org.bukkit.block.data.Rail;
-import org.bukkit.block.data.Rotatable;
-import org.bukkit.block.data.Waterlogged;
-import org.bukkit.block.data.type.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.EntityType;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.BlockInventoryHolder;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Entity;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -187,116 +69,19 @@ import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import net.countercraft.movecraft.processing.MovecraftWorld;
-import net.countercraft.movecraft.WorldHandler;
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.BaseCraft;
-import net.countercraft.movecraft.craft.PlayerCraft;
-import net.countercraft.movecraft.craft.CraftManager;
-import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.events.CraftDetectEvent;
-import net.countercraft.movecraft.events.CraftReleaseEvent;
-import net.countercraft.movecraft.events.CraftMergeEvent;
-import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.util.MathUtils;
-import net.countercraft.movecraft.events.PlayerCraftMovementEvent;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.util.Vector;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.Bukkit;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Maps;
-
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.ArrayDeque;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.io.File;
-import java.util.Queue;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ListIterator;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.logging.Level;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-
-
-
-import static net.countercraft.movecraft.util.ItemUtils.reduceItemStack;
-import static net.countercraft.movecraft.util.ItemUtils.isSimilar;
-import static net.countercraft.movecraft.util.ItemUtils.isPowerItem;
-import static net.countercraft.movecraft.util.ItemUtils.updateItemDurability;
 
 import static net.countercraft.movecraft.util.ChatUtils.ERROR_PREFIX;
+import static net.countercraft.movecraft.util.ItemUtils.*;
 
 public class CraftManager implements Iterable<Craft>{
-    private final String HEADER = "Remote Sign";
+    private final String REMOTE_SIGN_HEADER = "Remote Sign";
     private static CraftManager ourInstance;
     @NotNull public final Set<Craft> crafts = new ConcurrentSkipListSet<>(Comparator.comparingInt(Craft::hashCode));
     @NotNull public final ConcurrentMap<Player, PlayerCraft> craftPlayerIndex = new ConcurrentHashMap<>();
@@ -506,26 +291,12 @@ public class CraftManager implements Iterable<Craft>{
         }
         return newBox;
     }
-    public void teleportCraft(Craft c, Location bl) {
-       int dx, dy, dz = 0;
-       World dw = c.getWorld();
-       if (bl.getWorld() == null) {
-          dw = c.getWorld();
-       } else {
-          dw = bl.getWorld();
-       }
-       Location center = c.getHitBox().getMidPoint().toBukkit(c.getWorld());
-       dx = bl.getBlockX() - center.getBlockX();
-       dy = bl.getBlockY() - center.getBlockY();
-       dz = bl.getBlockZ() - center.getBlockZ();
-       c.translate(dw,dx,dy,dz);
-    }
 
     @NotNull
     public void addFuelType(ItemStack stack, double chance) {
         fuelTypes.add(stack);
-        fuelTypeChance.add(chance);
-        fuelTypeMap.put(stack,chance);
+        fuelTypeChance.add((Double) chance);
+        fuelTypeMap.put(stack,(Double) chance);
     }
     @NotNull
     public Set<CraftType> getCraftTypes() {
@@ -617,7 +388,7 @@ public class CraftManager implements Iterable<Craft>{
                 iters++;
             }
         }
-        craft.setDataTag("has_fuel",found);
+        craft.setDataTag("has_fuel",(Boolean)found);
         return found;
     }
     public boolean forceCheckFuel(final Craft craft, int fuelBurnRate, double percBurnChance, ItemStack fuelItem, ItemStack wasteItem, Collection<MovecraftLocation> blockCollection) {
@@ -1837,7 +1608,7 @@ public class CraftManager implements Iterable<Craft>{
         return null;
     }
     public boolean isEqualSign(Sign test, String target) {
-        return !ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(HEADER) && ( ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(target)
+        return !ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(REMOTE_SIGN_HEADER) && ( ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(1)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(2)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(3)).equalsIgnoreCase(target) );
@@ -1994,7 +1765,7 @@ public class CraftManager implements Iterable<Craft>{
 
     @NotNull
     public long getTimeFromOverboard(Player player) {
-        return overboards.getOrDefault(player, 0L);
+        return overboards.getOrDefault(player, (Long)0L);
     }
 
     @Nullable

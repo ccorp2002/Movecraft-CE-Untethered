@@ -1,59 +1,9 @@
 package net.countercraft.movecraft.util;
 
 
-import com.google.common.collect.*;
-import java.util.*;
-
-
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.PlayerCraftImpl;
-import net.countercraft.movecraft.craft.BaseCraft;
-import net.countercraft.movecraft.craft.SubCraft;
-import net.countercraft.movecraft.craft.SinkingCraft;
-import net.countercraft.movecraft.craft.NPCCraftImpl;
-import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.CraftManager;
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.MovecraftRotation;
-import net.countercraft.movecraft.CruiseDirection;
-import net.countercraft.movecraft.MovecraftChunk;
-import net.countercraft.movecraft.WorldHandler;
-import net.countercraft.movecraft.processing.CachedMovecraftWorld;
-import net.countercraft.movecraft.processing.MovecraftWorld;
-import net.countercraft.movecraft.processing.WorldManager;
-import net.countercraft.movecraft.util.hitboxes.HitBox;
-import net.countercraft.movecraft.util.MathUtils;
-import net.countercraft.movecraft.util.DirectionalUtils;
-import net.countercraft.movecraft.config.Settings;
-
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.ExplosionResult;
-
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.inventory.meta.*;
-import org.bukkit.inventory.*;
-import org.bukkit.block.data.*;
-import org.bukkit.block.data.type.*;
-import org.bukkit.block.*;
-import org.bukkit.entity.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.util.Vector;
-
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public final class ItemUtils {
   protected static final ItemStack airItem = new ItemStack(Material.AIR,0);

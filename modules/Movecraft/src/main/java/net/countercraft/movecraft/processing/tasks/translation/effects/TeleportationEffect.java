@@ -1,20 +1,17 @@
 package net.countercraft.movecraft.processing.tasks.translation.effects;
 
 import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.SinkingCraft;
 import net.countercraft.movecraft.craft.BaseCraft;
-import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.mapUpdater.update.EntityUpdateCommand;
 import net.countercraft.movecraft.processing.effects.Effect;
+import net.countercraft.movecraft.util.MathUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
-import net.countercraft.movecraft.util.MathUtils;
 
 public class TeleportationEffect implements Effect {
     private final @NotNull Craft craft;
