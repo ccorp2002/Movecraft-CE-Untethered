@@ -41,10 +41,10 @@ GeneratedDatapack: false # Set to false to re-generate datapack on startup
 GearshiftsWithPilotToolEnabled: true #Allows Players to Change speeds via Sneak-Right Clicking with the Stick/Control-Item
 
 
-# >>> EXPERIMENTAL <<<
+# >>> EXPERIMENTAL ADDITION <<<
 #The Following ONLY works if you are using the Paper Fork of:
 #- https://github.com/SparklyPower/SparklyPaper
 # Enables:
 # Multiworld-Threading (TLDR; Large Crafts will move without extensively lagging the main thread of the server.)
 IsMultithreaded: false
-# >>> EXPERIMENTAL <<<
+# >>> EXPERIMENTAL ADDITION <<<

@@ -1,6 +1,4 @@
-# **Movecraft : Community Edition**
-
-# Don't expect much active support from me. You're on your own here. I have enough on my plate as it is.
+# **Movecraft-Community Edition : Unteathered**
 
 
 ## Requires at least *Java 21+ & Minecraft 1.20.4-1.21.3*.
@@ -17,11 +15,14 @@
 
 - Delayed the expensive (Both Server- and Client-side) Lighting Updates, by a few seconds (>5s) post movement. Should help with Player's FPS on large ships and makes Craft Movement visually smoother.
 
+- New `config.yml` Options.
+- New `ShipType.craft` Options.
+
 - Improved how movecraft goes about block-setting and sending the changes to nearby players.
+
 - Added back WASD Direct Control, use `/dc` to toggle it.
 
 - Changes to how Fuel Items are burnt; Fuel may burn faster or slower compared to APDev/Mainstream Movecraft.
-- Added .
 
 - New Total Blockcount Craft-HP Actionbar, displays the amount of Remaining blocks aboard the craft, over the amount of initial blocks. (Non-Air Blocks, in particular)
 
@@ -37,18 +38,29 @@
 
 
 
+## >>> EXPERIMENTAL ADDITION <<<
+> The Following **ONLY** works if you are using the Paper Fork of:
+> https://github.com/SparklyPower/SparklyPaper
+> Enables:
+> Multiworld-Threading (TLDR; Large Crafts will move without extensively lagging the main thread of the server.)
+> *In the* `config.yml`
+```IsMultithreaded: false```
+## >>> EXPERIMENTAL ADDITION <<<
 
 
-[![Movecraft : Java CI](https://github.com/ccorp2002/Movecraft-CommunityEdition/actions/workflows/maven.yml/badge.svg?branch=ce-main)](https://github.com/ccorp2002/Movecraft-CommunityEdition/actions/workflows/maven.yml)
+
+
+
+[![Movecraft : Java CI](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions/workflows/maven.yml/badge.svg?branch=ce-main)](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions/workflows/maven.yml)
 
 
 This is **another** maintained fork of Movecraft, which aims to maintain compatibility with APDev/Mainstream-Movecraft as well as provide Performance Changes & Fixes, API Upgrades, Ticking/Updating Redstone Components.
 
 ## Download
 
-Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CommunityEdition/releases).
+Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/releases).
 
-Development builds can be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CommunityEdition/actions?query=workflow%3A%22Java+CI%22).  Use at your own risk!
+Development builds can be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions?query=workflow%3A%22Java+CI%22).  Use at your own risk!
 
 
 ## Development Environment
