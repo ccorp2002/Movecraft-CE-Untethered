@@ -1,0 +1,52 @@
+name: Movecraft
+version: Unteathered-1.0.0
+api-version: 1.19
+description: The original flight and movement plugin for minecraft.
+author: "C_Corp2002, based on: BaccaYarro, cccm5, TylerS1066, eirik1996, drfiveminusmint and HumorousFool's Work"
+website: https://github.com/APDevTeam/Movecraft
+main: net.countercraft.movecraft.Movecraft
+
+database: false
+commands:
+  movecraft:
+    description: base movecraft command
+    usage: /movecraft [reloadtypes]
+  release:
+    description: Releases your craft
+    usage: /release
+  pilot:
+    description: Pilots the craft at your feet
+    usage: /pilot [crafttypename]
+  contacts:
+    description: reports on all crafts within detection range
+    usage: /contacts <page>
+  craftreport:
+    description: reports on all active craft in the world you are in
+    usage: /craftreport <page>
+  cruise:
+    description: Starts your craft cruising
+    usage: /cruise [north|south|east|west|on|off]
+  rotate:
+    description: Rotates your craft
+    usage: /rotate [right|left]
+  dc:
+    description: Toggles direct control of your Craft
+    usage: /dc
+  crew:
+    description: Adds or removes a player from your Craft's Crew/Passengers
+    usage: /crew <username>
+  manoverboard:
+    description: If enabled, returns you to a craft you have fallen out of
+    usage: /manoverboard
+  scuttle:
+    description: Sinks piloted craft
+    usage: /scuttle
+  crafttype:
+    description: Get information on a specifc craft type
+    usage: /crafttype [type] [page]
+  craftinfo:
+    description: Get information on a piloted craft
+    usage: /crafttype [player] [page]
+libraries:
+  - org.roaringbitmap:RoaringBitmap:1.0.6
+  - it.unimi.dsi:fastutil:8.5.13
