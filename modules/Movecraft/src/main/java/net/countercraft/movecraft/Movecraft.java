@@ -198,6 +198,8 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         }
         getLogger().info(I18nSupport.getInternationalisedString("Startup - Loading Support") + " " + version);
 
+        Settings.ENABLE_CREW = getConfig().getBoolean("EnableCrew", false);
+        Settings.ENABLE_DC = getConfig().getBoolean("EnableDC", true);
         Settings.EXTRA_COMMANDS = getConfig().getBoolean("ExtraCommands", false);
         Settings.SinkCheckTicks = getConfig().getDouble("SinkCheckTicks", 100.0);
         Settings.ManOverboardTimeout = getConfig().getInt("ManOverboardTimeout", 30);
@@ -273,11 +275,8 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         getCommand("cruise").setExecutor(new CruiseCommand());
         getCommand("craftreport").setExecutor(new CraftReportCommand());
         getCommand("manoverboard").setExecutor(new ManOverboardCommand());
-
-        if (Settings.EXTRA_COMMANDS) {
-            getCommand("dc").setExecutor(new DirectControlCommand());
-            getCommand("crew").setExecutor(new CrewCommand());
-        }
+        getCommand("dc").setExecutor(new DirectControlCommand());
+        getCommand("crew").setExecutor(new CrewCommand());
         //getCommand("contacts").setExecutor(new ContactsCommand());
         getCommand("scuttle").setExecutor(new ScuttleCommand());
         getCommand("crafttype").setExecutor(new CraftTypeCommand());

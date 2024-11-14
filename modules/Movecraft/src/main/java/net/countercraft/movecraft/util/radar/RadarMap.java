@@ -32,7 +32,7 @@ public class RadarMap {
 
 
   public static Set<Craft> getRadarContacts(Craft craft) {
-    double range = 0;
+    double range = 250;
     Set<Craft> crafts = new HashSet<>();
     if (craft.getDataTag("radar_range") != null) {
       range = (double)craft.getDataTag("radar_range");
@@ -42,7 +42,7 @@ public class RadarMap {
       if (oth.getDataTag("radar_profile") != null) {
         radar = (double)oth.getDataTag("radar_profile");
       }
-      radar += range;
+      range += radar;
       double dist = (double)craft.getMidPoint().distance(oth.getMidPoint());
       if (dist > range) continue;
       crafts.add(oth);

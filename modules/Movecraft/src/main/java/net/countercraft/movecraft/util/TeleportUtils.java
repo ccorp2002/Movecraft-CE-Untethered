@@ -3,6 +3,8 @@ package net.countercraft.movecraft.util;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.PlayerCraft;
+import net.countercraft.movecraft.craft.PilotedCraft;
 import net.countercraft.movecraft.craft.CraftManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -18,10 +20,10 @@ import org.bukkit.inventory.InventoryView;
 public class TeleportUtils {
 
     public static void teleportEntity(Entity entity, Location location) {
-      teleportEntity(entity,location,0.0f);
+      teleportEntity(entity,location,0.0f,0.0f);
     }
 
-    public static void teleportEntity(Entity entity, Location location, float yawChange) {
+    public static void teleportEntity(Entity entity, Location location, float yawChange, float pitchChange) {
         Location to = location;
         boolean tp = false;
         BaseCraft pcraft = null;
@@ -30,8 +32,12 @@ public class TeleportUtils {
           return;
         }
         try {
-            if (entity instanceof Player && pcraft instanceof BaseCraft) {
+            if (entity instanceof Player && pcraft instanceof PilotedCraft) {
                 if (entity.getWorld().equals(location.getWorld())) {
+                    if (((PlayerCraft)pcraft).getPilotLocked()) {
+                      tp = (entity).teleport(to);
+                      return;
+                    }
                     InventoryView inventoryView = null;
                     Location iLoc = null;
                     MovecraftLocation invMoveLoc = null;
@@ -48,31 +54,31 @@ public class TeleportUtils {
                       }
                       if (entity.getLocation().getWorld().equals(location.getWorld()) && (MathUtils.bukkit2MovecraftLoc(entity.getLocation()).distanceSquared(MathUtils.bukkit2MovecraftLoc(location)) <= 120)) {
                         if ((invMoveLoc != null && iLoc != null)) {
-                          Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location);
+                          Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location, yawChange, pitchChange);
                           //tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.Relative.values());
                           tp = true;
                         } else {
                           //tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.Relative.values());
-                          Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location);
+                          Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location, yawChange, pitchChange);
                           tp = true;
                         }
                       } else {
-                        tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.Relative.values());
+                        tp = (entity).teleport(to);
                       }
                       if (tp) return;
                   } else {
-                    tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.EntityState.values());
+                    tp = (entity).teleport(to);
                   }
                 } else {
-                  tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.EntityState.values());
+                  tp = (entity).teleport(to);
                 }
             } else {
               if (tp) return;
               if (entity instanceof Player) {
                 tp = true;
-                Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location);
+                Movecraft.getInstance().getSmoothTeleport().teleport((Player) entity, location, yawChange, pitchChange);
               }
-              else tp = (entity).teleport(to,io.papermc.paper.entity.TeleportFlag.EntityState.values());
+              else tp = (entity).teleport(to);
             }
         } catch (Exception exc) {
             if (tp) return;
@@ -80,20 +86,16 @@ public class TeleportUtils {
         }
     }
 
-    public static void teleport(Entity player, Location location, float yawChange) {
+    public static void teleport(Entity player, Location location, float yawChange, float pitchChange) {
         if (!player.getWorld().equals(location.getWorld())) {
-          teleportEntity(player,location,0.0f);
+          teleportEntity(player,location,0.0f,0.0f);
           return;
         }
         if (player.getVehicle()!=null) {
           Entity vehicle = player.getVehicle();
-          teleportEntity(vehicle,location,yawChange);
+          teleportEntity(vehicle,location,yawChange,pitchChange);
           return;
         }
-        if (yawChange != 0.0f) {
-          teleportEntity(player,location,yawChange);
-          return;
-        }
-        teleportEntity(player,location,0.0f);
+        teleportEntity(player,location,yawChange,pitchChange);
     }
 }

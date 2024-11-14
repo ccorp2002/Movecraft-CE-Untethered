@@ -39,7 +39,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.WallSign;
-import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -130,9 +129,8 @@ public class PlayerListener implements Listener {
               if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("remote sign")) continue;
               if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("subcraft")) continue;
               try {
-                sign.setWaxed(false);
-              } catch (Exception exc) {
                 sign.setEditable(true);
+              } catch (Exception exc) {
               }
               sign.update();
             }
@@ -158,7 +156,7 @@ public class PlayerListener implements Listener {
           e.setCancelled(true);
       }
       if ((e.isCancelled())) {
-        if (!(e.getCraft() instanceof PlayerCraftImpl)) return;
+        if ((e.getCraft() instanceof PlayerCraftImpl)) return;
         CraftManager.getInstance().forceRemoveCraft(e.getCraft());
         return;
       }
@@ -201,10 +199,8 @@ public class PlayerListener implements Listener {
               for (Block block : craft.getBlockName("SIGN")) {
                 Sign sign = (Sign)block.getState();
                 try {
-                  sign.setWaxed(true);
                   sign.setEditable(false);
                 } catch (Exception exc) {
-                  sign.setEditable(false);
                 }
                 if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("cruise:")) {
                   if (!(sign.getBlockData() instanceof WallSign))
@@ -249,7 +245,6 @@ public class PlayerListener implements Listener {
               if (entity == null) continue;
               if (!(MathUtils.locationNearHitBox(craft.getHitBox(),entity.getLocation(),2))) {
                 if (entity.getType() == EntityType.PLAYER) (craft).removePassenger(entity);
-                if (entity instanceof Display) (craft).removePassenger(entity);
                 continue;
               }
               (craft).addPassenger(entity);
@@ -275,7 +270,7 @@ public class PlayerListener implements Listener {
       return;
     int dx, dy, dz;
     dx = dy = dz = 0;
-    if (MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(),2.0D)) {
+    if (MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(),5.0D)) {
       //this.timeToReleaseAfter.remove(c);
       if (!(CraftManager.getInstance().getCraftsInWorld(p.getWorld()).contains(c))) {
         return;
@@ -288,7 +283,7 @@ public class PlayerListener implements Listener {
         Location toloc = loc.clone();
         Location fromloc = event.getFrom();
 
-        if (!p.hasPermission("movecraft." + craft.getType().getStringProperty(CraftType.NAME) + ".move")) {
+        if (!p.hasPermission("movecraft." + craft.getType().getStringProperty(CraftType.NAME) + ".dc")) {
             p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             return; // Player doesn't have permission = move this craft, so don't do anything
         }
@@ -364,25 +359,35 @@ public class PlayerListener implements Listener {
             newloc.setYaw(p.getLocation().getYaw());
             newloc.setPitch(p.getLocation().getPitch());
             //event.setTo(newloc);
-            p.teleport(newloc,org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN,io.papermc.paper.entity.TeleportFlag.Relative.values());
+            p.teleport(newloc);
             craft.setLastCruiseUpdate(System.currentTimeMillis());
             c.translate(dx, 0, dz);
           }
-          return;
-        }
-      }
-    }
-    if (!MathUtils.locationNearHitBox((c.getHitBox()),p.getLocation(),15.0D)) {
-        if (Settings.ManOverboardTimeout != 0) {
-          p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("Manoverboard - Player has left craft"));
-          CraftManager.getInstance().addOverboard(p);
-        } else {
-          p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
-          try {
-            CraftManager.getInstance().forceRemoveCraft(CraftManager.getInstance().getCraftByPlayer(event.getPlayer()));
-          } catch (Exception ex) {}
         }
         return;
+      }
+    }
+
+    if(MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(), 7.5d)){
+        timeToReleaseAfter.remove(c);
+        return;
+    }
+
+    if(timeToReleaseAfter.containsKey(c) && timeToReleaseAfter.get(c) < System.currentTimeMillis()){
+        CraftManager.getInstance().release(c, CraftReleaseEvent.Reason.PLAYER, false);
+        timeToReleaseAfter.remove(c);
+        return;
+    }
+    if (c.isNotProcessing() && c.getType().getBoolProperty(CraftType.MOVE_ENTITIES)
+            && !timeToReleaseAfter.containsKey(c)) {
+        if (Settings.ManOverboardTimeout != 0) {
+            c.getAudience().sendActionBar(I18nSupport.getInternationalisedComponent("Manoverboard - Player has left craft"));
+            CraftManager.getInstance().addOverboard(p);
+        }
+        else {
+            p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
+        }
+        timeToReleaseAfter.put(c, System.currentTimeMillis() + c.getType().getIntProperty(CraftType.RELEASE_TIMEOUT) * 1000L);
     }
   }
 }

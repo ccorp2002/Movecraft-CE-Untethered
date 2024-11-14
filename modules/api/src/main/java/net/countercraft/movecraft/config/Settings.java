@@ -27,6 +27,8 @@ import java.util.Map;
 
 public class Settings {
     public static boolean IS_MULTITHREADED = false;
+    public static boolean ENABLE_CREW = false;
+    public static boolean ENABLE_DC = true;
     public static boolean EXTRA_COMMANDS = false;
     public static boolean IGNORE_RESET = false;
     public static boolean Debug = false;

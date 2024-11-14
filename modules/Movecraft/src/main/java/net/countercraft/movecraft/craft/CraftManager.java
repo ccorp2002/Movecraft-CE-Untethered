@@ -422,7 +422,7 @@ public class CraftManager implements Iterable<Craft>{
                         //ItemStack stack = listIterator1.next();
                         ItemStack stack = inv.getItem(itr);
                         if (stack == null) continue;
-                        if (fuelItem != null && (isSimilar(stack,fuelItem) || isPowerItem(stack))) {
+                        if (fuelItem != null && (isSimilar(stack,fuelItem))) {
                             if ((int)percBurnChance >= 100d) chance = 101;
                             else chance = rand.nextInt((int)percBurnChance);
                             if (chance >= 99) {

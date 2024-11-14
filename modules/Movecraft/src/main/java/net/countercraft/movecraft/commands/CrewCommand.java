@@ -18,7 +18,7 @@ public class CrewCommand implements CommandExecutor{
         if(!command.getName().equalsIgnoreCase("crew")){
             return false;
         }
-        if (!Settings.EXTRA_COMMANDS) return false;
+        if (!Settings.ENABLE_CREW) return true;
         if(!(commandSender instanceof Player)){
             commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + "Must Be a Player to use the Crew Command");
             return true;

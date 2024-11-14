@@ -550,6 +550,7 @@ public abstract class BaseCraft implements Craft {
         MovecraftLocation mloc = MathUtils.bukkit2MovecraftLoc(b.getLocation());
         box.add(mloc);
         setDataTag("current_size",(Integer)getDataTag("current_size")+1);
+        setOrigBlockCount((int)getDataTag("current_size")+1);
         this.setHitBox(box);
     }
     public void removeBlock(Block b) {
@@ -557,6 +558,7 @@ public abstract class BaseCraft implements Craft {
         MovecraftLocation mloc = MathUtils.bukkit2MovecraftLoc(b.getLocation());
         box.remove(mloc);
         setDataTag("current_size",(Integer)getDataTag("current_size")-1);
+        setOrigBlockCount((int)getDataTag("current_size")-1);
         this.setHitBox(box);
     }
     public void removeMaterial(Material m) {
@@ -566,6 +568,7 @@ public abstract class BaseCraft implements Craft {
             mlocs.add(MathUtils.bukkit2MovecraftLoc(b.getLocation()));
         }
         setDataTag("current_size",(Integer)getDataTag("current_size")-mlocs.size());
+        setOrigBlockCount((int)getDataTag("current_size")-mlocs.size());
         box.removeAll(mlocs);
         this.setHitBox(box);
     }
@@ -845,7 +848,6 @@ public abstract class BaseCraft implements Craft {
                 sign.setLine(0, "Descend: ON");
             }
             try {
-                sign.setWaxed(true);
                 sign.setEditable(false);
             } catch (Exception exc) {
                 sign.setEditable(true);
@@ -889,10 +891,8 @@ public abstract class BaseCraft implements Craft {
                 sign.setLine(0, "Descend: OFF");
             }
             try {
-                sign.setWaxed(true);
-                sign.setEditable(false);
-            } catch (Exception exc) {
                 sign.setEditable(true);
+            } catch (Exception exc) {
             }
             sign.update();
         }

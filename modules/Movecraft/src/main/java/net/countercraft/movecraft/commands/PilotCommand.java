@@ -79,8 +79,7 @@ public class PilotCommand implements TabExecutor {
                 craft -> () -> {
                     // Release old craft if it exists
                     Craft oldCraft = CraftManager.getInstance().getCraftByPlayer(player);
-                    if(oldCraft != null)
-                        CraftManager.getInstance().forceRemoveCraft(oldCraft);//, CraftReleaseEvent.Reason.PLAYER);
+                    if(oldCraft != null) CraftManager.getInstance().forceRemoveCraft(oldCraft);//, CraftReleaseEvent.Reason.PLAYER);
                 }
         );
        return true;

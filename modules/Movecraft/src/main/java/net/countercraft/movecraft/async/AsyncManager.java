@@ -309,7 +309,7 @@ public class AsyncManager extends BukkitRunnable {
                 dz *= gearshift;
             }
             if (craft instanceof BaseCraft base) {
-                if (System.currentTimeMillis() - base.getLastMoveTime() > (long)(2500*base.getTickCooldown())) {
+                if (System.currentTimeMillis() - base.getLastMoveTime() > (long)(250*base.getTickCooldown())) {
                     if (base.getCruising()) continue;
                 }
             }
@@ -517,20 +517,15 @@ public class AsyncManager extends BukkitRunnable {
         // now cleanup craft that are bugged and have not moved in the past 60 seconds,
         //  but have no pilot or are still processing
         for (Craft craft : CraftManager.getInstance()) {
-            long ticksElapsed = (System.currentTimeMillis() - craft.getLastMoveTime()) / 50;
-            if (craft.isAutomated()) {
-                if (ticksElapsed >= craft.getTickCooldown()+3000) craft.setProcessing(false);
-                continue;
+            if (!(craft instanceof PilotedCraft) && !craft.isAutomated()) {
+                if (craft.getLastCruiseUpdate() < System.currentTimeMillis() - 60000)
+                    CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.INACTIVE, true);
             }
-
             if (!craft.isNotProcessing()) {
                 if (craft.getCruising()) {
-                    if (ticksElapsed >= craft.getTickCooldown()+3000) craft.setProcessing(false);
+                    if (craft.getLastCruiseUpdate() < System.currentTimeMillis() - 5000)
+                        craft.setProcessing(false);
                 }
-            }
-            if (!(craft instanceof PilotedCraft) && !(craft instanceof SinkingCraft)) {
-                if (craft.getLastMoveTime() < System.currentTimeMillis() - 60000)
-                    CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.INACTIVE, true);
             }
         }
     }
@@ -556,10 +551,6 @@ public class AsyncManager extends BukkitRunnable {
         Bukkit.getPluginManager().callEvent(updateEvent);
         if (updateEvent.isCancelled()) return CraftStatus.of(false, false);
 
-
-        if (craft.getOrigBlockCount()>=256000*8) {
-            return CraftStatus.of(false, false);
-        }
         // go through each block in the HitBox, and if it's in the FlyBlocks or MoveBlocks, increment the counter
         int totalNonNegligibleBlocks = 0;
         int totalNonNegligibleWaterBlocks = 0;

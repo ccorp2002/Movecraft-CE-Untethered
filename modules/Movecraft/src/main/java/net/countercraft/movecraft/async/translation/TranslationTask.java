@@ -449,10 +449,9 @@ public class TranslationTask extends AsyncTask {
             for (Entity entity : nearEntites) {
                 if (entity == null) continue;
                 if (entity.getVehicle() != null) continue;
-                if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.FIREWORK_ROCKET && entity.getType() != EntityType.TNT && entity.getType() != EntityType.ARROW) {
+                if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.ARROW) {
                     
                     if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft.isAutomated())) {
-                        if ((entity instanceof Display) || (entity instanceof Interaction)) continue;
                         ((BaseCraft)craft).addPassenger(entity);
                     }
                 }

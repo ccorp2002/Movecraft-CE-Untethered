@@ -254,9 +254,8 @@ public class RotationTask extends AsyncTask {
             for (Entity entity : nearEntites) {
                     if (entity == null) continue;
                     if (entity.getVehicle() != null) continue;
-                    if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.FIREWORK_ROCKET && entity.getType() != EntityType.TNT && entity.getType() != EntityType.ARROW) {
+                    if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.ARROW) {
                         if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft.isAutomated())) {
-                            if ((entity instanceof Display) || (entity instanceof Interaction)) continue;
                             ((BaseCraft)craft).addPassenger(entity);
                         }
                     }
@@ -283,7 +282,7 @@ public class RotationTask extends AsyncTask {
                         }
                     }
                     if (entity.getVehicle() != null) continue;
-                    if (((entity.getType() == EntityType.PLAYER || entity.getType() == EntityType.TNT) && !craft.getSinking()) || !craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || ((BaseCraft)craft).getPassengers().contains(entity)) {
+                    if (((entity.getType() == EntityType.PLAYER || entity.getType() == EntityType.PRIMED_TNT) && !craft.getSinking()) || !craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || ((BaseCraft)craft).getPassengers().contains(entity)) {
                         // Player is onboard this craft
                         if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
                         if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {

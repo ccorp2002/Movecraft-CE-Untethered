@@ -17,7 +17,7 @@ public class DirectControlCommand implements CommandExecutor{
         if(!command.getName().equalsIgnoreCase("dc")){
             return false;
         }
-        if (!Settings.EXTRA_COMMANDS) return false;
+        if (!Settings.ENABLE_DC) return true;
         if(!(commandSender instanceof Player)){
             commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + "Must Be a Player to use Direct Control");
             return true;

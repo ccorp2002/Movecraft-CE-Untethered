@@ -4,10 +4,14 @@ PilotTool: STICK
 # Enables:
 # WASD Direct Control w/Keyboard Turning (Sneak-walking sideways in Direct Control)
 # The "/dc" Command
+
+lockPilotAtDirectControl: true
+EnableDC: true
+
+# Enables:
 # Passengers/Crews (Allows the Pilot to add/remove Players who can 'stick' to their Ship)
 # The "/crew <username>" Command, allows the above.
-ExtraCommands: true
-lockPilotAtDirectControl: true
+EnableCrew: true
 
 DisableSpillProtection: false
 DisableIceForm: true

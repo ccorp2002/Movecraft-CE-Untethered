@@ -34,13 +34,13 @@
     </repositories>
 
     <dependencies>
-        <!-- <dependency>
+        <dependency>
             <groupId>net.countercraft</groupId>
-            <artifactId>movecraft-v1_19_r3</artifactId>
+            <artifactId>movecraft-v1_19_r2</artifactId>
             <version>${revision}</version>
-            <optional>true</optional> value will be true or false only
+            <optional>true</optional> <!-- value will be true or false only -->
             <type>jar</type>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>net.countercraft</groupId>
             <artifactId>movecraft-v1_20_r3</artifactId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.1-R0.1-SNAPSHOT</version>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -203,12 +203,12 @@
                             <minimizeJar>true</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
-                                <!-- <filter>
-                                    <artifact>net.countercraft:movecraft-v1_19_r3</artifact>
+                                <filter>
+                                    <artifact>net.countercraft:movecraft-v1_19_r2</artifact>
                                     <includes>
                                         <include>**</include>
                                     </includes>
-                                </filter> -->
+                                </filter>
                                 <filter>
                                     <artifact>net.countercraft:movecraft-v1_20_r3</artifact>
                                     <includes>

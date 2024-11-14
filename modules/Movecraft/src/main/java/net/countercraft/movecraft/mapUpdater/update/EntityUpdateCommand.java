@@ -127,7 +127,7 @@ public class EntityUpdateCommand extends UpdateCommand {
                 ((Player) entity).playSound(destLoc, sound, volume, 1.0f);
             }
         }
-        TeleportUtils.teleport(entity, destLoc, yaw);
+        TeleportUtils.teleport(entity, destLoc, yaw, pitch);
     }
 
     @Override

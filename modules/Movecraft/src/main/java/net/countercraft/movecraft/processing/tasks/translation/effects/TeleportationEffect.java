@@ -48,7 +48,7 @@ public class TeleportationEffect implements Effect {
                 }
                 EntityUpdateCommand eUp = new EntityUpdateCommand(entity, translation.getX(), translation.getY(), translation.getZ(), 0, 0, world);
                 eUp.doUpdate();
-            } else if (!craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || entity.getType() == EntityType.TNT) {
+            } else if (!craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || entity.getType() == EntityType.PRIMED_TNT) {
                 EntityUpdateCommand eUp = new EntityUpdateCommand(entity, translation.getX(), translation.getY(), translation.getZ(), 0, 0, world);
                 eUp.doUpdate();
             }

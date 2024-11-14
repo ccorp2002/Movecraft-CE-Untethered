@@ -1,6 +1,7 @@
 package net.countercraft.movecraft.sign;
 
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
 import net.countercraft.movecraft.craft.CraftManager;
 import org.bukkit.ChatColor;
 import org.bukkit.block.BlockState;
@@ -32,6 +33,7 @@ public final class ReleaseSign implements Listener{
         if (craft == null) {
             return;
         }
-        CraftManager.getInstance().forceRemoveCraft(craft);
+        event.setCancelled(true);
+        CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.PLAYER, false);
     }
 }

@@ -25,6 +25,7 @@ import net.countercraft.movecraft.events.CraftBlockChangeEvent;
 import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.Tags;
 import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
@@ -103,23 +104,27 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
     public void onBlockExplode(@NotNull BlockExplodeEvent e) {
+        if (e.isCancelled()) {
+            return;
+        }
         for (Block block : e.blockList()) {
             Craft craft = CraftManager.getInstance().getCraftFromBlock(block);
             if (craft == null) continue;
-            if (!block.getType().isSolid()) craft.removeBlock(block);
-            craft.updateLastMoveTime();
+            tryRemoveBlock(block,craft);
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
     public void onEntityExplode(@NotNull EntityExplodeEvent e) {
+        if (e.isCancelled()) {
+            return;
+        }
         for (Block block : e.blockList()) {
             Craft craft = CraftManager.getInstance().getCraftFromBlock(block);
             if (craft == null) continue;
-            if (!block.getType().isSolid()) craft.removeBlock(block);
-            craft.updateLastMoveTime();
+            tryRemoveBlock(block,craft);
         }
     }
 
@@ -153,6 +158,17 @@ public class BlockListener implements Listener {
                 return;
             }
         }
+    }
+    public static void tryRemoveBlock(final MovecraftLocation movecraftLocation, final Craft craft) {
+        final Block block = movecraftLocation.toBukkit(craft.getWorld()).getBlock();
+        craft.updateLastMoveTime();
+        craft.removeBlock(block);
+    }
+
+    public static void tryRemoveBlock(final Block block, final Craft craft) {
+        final MovecraftLocation movecraftLocation = MathUtils.bukkit2MovecraftLoc(block.getLocation());
+        craft.updateLastMoveTime();
+        craft.removeBlock(block);
     }
 
     // process certain redstone on cruising crafts

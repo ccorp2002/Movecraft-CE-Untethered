@@ -63,9 +63,8 @@ public final class CraftSign implements Listener {
         if (craftType == null)
             return;
         try {
-        sign.setWaxed(true);
+            sign.setEditable(false);
         } catch (Exception exc) {
-        sign.setEditable(false);
         }
         sign.update(true,false);
 
@@ -148,12 +147,6 @@ public final class CraftSign implements Listener {
                                 CraftManager.getInstance().sink(craft);
                             }
                         }.runTaskLater(Movecraft.getInstance(), (20 * 30));
-                    }
-                    else {
-                        // Release old craft if it exists
-                        Craft oldCraft = CraftManager.getInstance().getCraftByPlayer(player);
-                        if (oldCraft != null)
-                            CraftManager.getInstance().forceRemoveCraft(oldCraft);
                     }
                 }
         );

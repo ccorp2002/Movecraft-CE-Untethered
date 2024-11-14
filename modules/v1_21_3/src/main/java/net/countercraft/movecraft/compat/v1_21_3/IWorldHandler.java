@@ -54,7 +54,6 @@ import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.inventory.InventoryView;
@@ -215,7 +214,6 @@ public class IWorldHandler extends WorldHandler {
         
         if (craft.getNotificationPlayer() == null) return;
         processLight(craft.getHitBox(),craft.getWorld());
-        if (craft.getOrigBlockCount()>=12800) return;
         processRedstone(redstoneComps.keySet(), nativeWorld);
     }
 
@@ -378,7 +376,6 @@ public class IWorldHandler extends WorldHandler {
         Bukkit.getPluginManager().callEvent(event);
         if (craft.getNotificationPlayer() == null) return;
         processLight(craft.getHitBox(),craft.getWorld());
-        if (craft.getOrigBlockCount()>=12800) return;
         processRedstone(redstoneComps, nativeWorld);
     }
 
@@ -591,7 +588,6 @@ public class IWorldHandler extends WorldHandler {
     }
 
     public void processRedstone(Collection<BlockPos> redstone, Level world) {
-        if (redstone.size() >= 480*4) return;
         for (final BlockPos pos : redstone) {
             BlockState data = getBlockFastest(world,pos);
             world.sendBlockUpdated(pos, data, data, 3);
@@ -732,24 +728,24 @@ public class IWorldHandler extends WorldHandler {
 
     private boolean isRedstoneComponent(Block block) {
         return block instanceof RedStoneWireBlock ||
-                //block instanceof FurnaceBlock ||
-                //block instanceof BlastFurnaceBlock ||
-                //block instanceof SmokerBlock ||
+                block instanceof FurnaceBlock ||
+                block instanceof BlastFurnaceBlock ||
+                block instanceof SmokerBlock ||
                 block instanceof DiodeBlock ||
                 block instanceof TargetBlock ||
                 block instanceof PressurePlateBlock ||
-                //block instanceof ButtonBlock ||
+                block instanceof ButtonBlock ||
                 block instanceof BasePressurePlateBlock ||
-                //block instanceof LeverBlock ||
-                //block instanceof HopperBlock ||
+                block instanceof LeverBlock ||
+                block instanceof HopperBlock ||
                 block instanceof ObserverBlock ||
                 block instanceof DaylightDetectorBlock ||
-                //block instanceof DispenserBlock ||
-                //block instanceof DropperBlock ||
+                block instanceof DispenserBlock ||
+                block instanceof DropperBlock ||
                 block instanceof RedstoneLampBlock ||
                 block instanceof RedstoneTorchBlock ||
                 block instanceof ComparatorBlock ||
-                //block instanceof SculkSensorBlock ||
+                block instanceof SculkSensorBlock ||
                 block instanceof PistonBaseBlock ||
                 block instanceof MovingPistonBlock ||
                 block instanceof CopperBulbBlock ||
@@ -767,7 +763,7 @@ public class IWorldHandler extends WorldHandler {
         LevelChunk chunk = (LevelChunk) nativeWorld.getChunkIfLoaded(newPosition);
         if (chunk == null) chunk = nativeWorld.getChunkAt(newPosition);
         try {
-            var positionField = BlockEntity.class.getDeclaredField("o"); // o is obfuscated worldPosition
+            var positionField = BlockEntity.class.getDeclaredField("p"); // p is obfuscated worldPosition
             UnsafeUtils.setField(positionField, tile, newPosition);
         }
         catch (NoSuchFieldException e) {
@@ -783,7 +779,6 @@ public class IWorldHandler extends WorldHandler {
         setBlockFastest(nativeWorld, newPosition, data);
         chunk.setBlockEntity(tile);
         chunk.blockEntities.put(newPosition, tile);
-        if (size >= 25_000) return;
         tile.setChanged();
     }
 
@@ -792,7 +787,7 @@ public class IWorldHandler extends WorldHandler {
         LevelChunk chunk = (LevelChunk) nativeWorld.getChunkIfLoaded(newPosition);
         if (chunk == null) chunk = nativeWorld.getChunkAt(newPosition);
         try {
-            var positionField = BlockEntity.class.getDeclaredField("o"); // o is obfuscated worldPosition
+            var positionField = BlockEntity.class.getDeclaredField("p"); // p is obfuscated worldPosition
             UnsafeUtils.setField(positionField, tile, newPosition);
         }
         catch (NoSuchFieldException e) {
@@ -809,7 +804,6 @@ public class IWorldHandler extends WorldHandler {
         setBlockFastest(nativeWorld, newPosition, data);
         chunk.setBlockEntity(tile);
         chunk.blockEntities.put(newPosition, tile);
-        if (size >= 25_000) return;
         tile.setChanged();
     }
     private static class TileHolder {
