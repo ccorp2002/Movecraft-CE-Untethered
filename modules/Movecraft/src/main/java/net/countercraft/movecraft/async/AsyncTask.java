@@ -53,7 +53,7 @@ public abstract class AsyncTask extends BukkitRunnable {
 
     public boolean checkFuel() {
         if (craft instanceof PlayerCraft) {
-            CraftManager.getInstance().forceBurnFuel(craft,1,1);
+            return CraftManager.getInstance().forceBurnFuelLater(craft,1,1);
         }
         return true;
     }

@@ -120,7 +120,7 @@ public class CraftManager implements Iterable<Craft>{
         this.addFuelType(new ItemStack(Material.CHARCOAL),75.0);
         this.addFuelType(new ItemStack(Material.COAL_BLOCK),125.0);
         this.addFuelType(new ItemStack(Material.DRIED_KELP_BLOCK),125.0);
-        this.addFuelType(new ItemStack(Material.BLAZE_ROD),250.0);
+        //this.addFuelType(new ItemStack(Material.BLAZE_ROD),250.0);
         this.addFuelType(new ItemStack(Material.LAVA_BUCKET),750.0);
         if(loadCraftTypes) {
             this.craftTypes = loadCraftTypes();
@@ -816,8 +816,10 @@ public class CraftManager implements Iterable<Craft>{
         if (currentSize <= 0 || originalSize <= 0) c.setDisabled(true);
         if (currentSize < sinkAmount) {
             c.setDisabled(false);
+            c.setSinking(true);
             return true;
         }
+        c.setSinking(false);
         return false;
     }
 
@@ -850,8 +852,10 @@ public class CraftManager implements Iterable<Craft>{
         if (currentLift >= originalLift) return false;
         if (currentLift < sinkAmount) {
             c.setDisabled(false);
+            c.setSinking(true);
             return true;
         }
+        c.setSinking(false);
         return false;
     }
 

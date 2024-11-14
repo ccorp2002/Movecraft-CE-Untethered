@@ -870,6 +870,7 @@ public abstract class BaseCraft implements Craft {
             //System.out.println("Found Sign? "+b.getBlockData().toString()+" LINES: 1: "+sign.getLine(0)+" 2: "+sign.getLine(1)+" 3: "+sign.getLine(2));
             if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: ON") || ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: OFF")) {
                 sign.setLine(0, "Cruise: OFF");
+                sign.setEditable(false);
                 if (!(sign.getBlockData() instanceof WallSign)) {
                     continue;
                 }
@@ -886,13 +887,11 @@ public abstract class BaseCraft implements Craft {
             }
             else if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Ascend: ON")) {
                 sign.setLine(0, "Ascend: OFF");
+                sign.setEditable(false);
             }
             else if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Descend: ON")) {
                 sign.setLine(0, "Descend: OFF");
-            }
-            try {
-                sign.setEditable(true);
-            } catch (Exception exc) {
+                sign.setEditable(false);
             }
             sign.update();
         }

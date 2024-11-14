@@ -345,7 +345,6 @@ public class CraftTranslateCommand extends UpdateCommand {
         }
         return hull;
     }
-
     private void sendSignEvents(){
         Object2ObjectMap<String[], List<MovecraftLocation>> signs = new Object2ObjectOpenCustomHashMap<>(new Hash.Strategy<String[]>() {
             @Override
@@ -360,13 +359,14 @@ public class CraftTranslateCommand extends UpdateCommand {
         });
         Map<MovecraftLocation, Sign> signStates = new HashMap<>();
 
-        for (MovecraftLocation location : craft.getHitBox()) {
-            Block block = location.toBukkit(craft.getWorld()).getBlock();
+        for (Block block : craft.getBlockName("SIGN")) {
+            final MovecraftLocation location = MathUtils.bukkit2MovecraftLoc(block.getLocation());
             if(!Tag.SIGNS.isTagged(block.getType())){
                 continue;
             }
             BlockState state = block.getState();
-            if (state instanceof Sign sign) {
+            if (state instanceof Sign) {
+                Sign sign = (Sign) state;
                 if(!signs.containsKey(sign.getLines()))
                     signs.put(sign.getLines(), new ArrayList<>());
                 signs.get(sign.getLines()).add(location);
@@ -376,11 +376,9 @@ public class CraftTranslateCommand extends UpdateCommand {
         for(Map.Entry<String[], List<MovecraftLocation>> entry : signs.entrySet()){
             SignTranslateEvent event = new SignTranslateEvent(craft, entry.getKey(), entry.getValue());
             Bukkit.getServer().getPluginManager().callEvent(event);
-            // if(!event.isUpdated()){
-            //     continue;
-            // }
-            // TODO: This is implemented only to fix client caching
-            //  ideally we wouldn't do the update and would instead fake it out to the player
+            if(!event.isUpdated()){
+                continue;
+            }
             for(MovecraftLocation location : entry.getValue()){
                 Block block = location.toBukkit(craft.getWorld()).getBlock();
                 BlockState state = block.getState();

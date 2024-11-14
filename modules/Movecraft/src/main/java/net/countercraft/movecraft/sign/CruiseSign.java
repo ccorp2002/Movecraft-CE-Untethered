@@ -37,10 +37,11 @@ public final class CruiseSign implements Listener {
             if (!(state instanceof Sign))
                 continue;
             Sign sign = (Sign) state;
+            sign.setEditable(false);
             if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: ON")) {
                 sign.setLine(0, "Cruise: OFF");
-                sign.update();
             }
+            sign.update();
         }
     }
 
