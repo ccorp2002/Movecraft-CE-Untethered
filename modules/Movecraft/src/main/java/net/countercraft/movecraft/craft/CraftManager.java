@@ -312,7 +312,6 @@ public class CraftManager implements Iterable<Craft>{
             return craft;
         }
         ((BaseCraft)craft).setSinking(true);
-        forceRemoveCraft(craft);
         Craft sunk = new SinkingCraftImpl(craft);
         CraftSinkEvent sinkevent = new CraftSinkEvent(sunk);
         Bukkit.getServer().getPluginManager().callEvent(sinkevent);
@@ -324,7 +323,6 @@ public class CraftManager implements Iterable<Craft>{
         if (sinkevent.isCancelled()) {
             sunk = craft;
         }
-        forceRemoveCraft(craft);
         CraftDetectEvent detect = new CraftDetectEvent(sunk, sunk.getHitBox().getMidPoint());
         Bukkit.getServer().getPluginManager().callEvent(detect);
         if (!detect.isCancelled()) addCraft(sunk);
@@ -818,7 +816,6 @@ public class CraftManager implements Iterable<Craft>{
         if (currentSize <= 0 || originalSize <= 0) c.setDisabled(true);
         if (currentSize < sinkAmount) {
             c.setDisabled(false);
-            c.sink();
             return true;
         }
         return false;
@@ -853,7 +850,6 @@ public class CraftManager implements Iterable<Craft>{
         if (currentLift >= originalLift) return false;
         if (currentLift < sinkAmount) {
             c.setDisabled(false);
-            c.sink();
             return true;
         }
         return false;
@@ -1160,8 +1156,10 @@ public class CraftManager implements Iterable<Craft>{
                 return;
         }
         crafts.remove(craft);
-        if(craft instanceof PlayerCraft)
+        if(craft instanceof PlayerCraft) {
             playerCrafts.remove(((PlayerCraft) craft).getPilot());
+            this.craftPlayerIndex.remove(((PlayerCraft) craft).getPilot());
+        }
 
         Movecraft.getInstance().getLogger().info("RELEASE REASON : "+reason);
         if(craft.getHitBox().isEmpty())

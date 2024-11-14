@@ -352,7 +352,10 @@ public class AsyncManager extends BukkitRunnable {
                 craft.setAudience(Movecraft.getAdventure().console());
                 craft.setDataTag("idle",(Boolean)true);
                 craft.setAutomated(false);
+
                 Craft sunk = CraftManager.getInstance().sink(craft);
+                CraftManager.getInstance().forceRemoveCraft(craft);
+                CraftManager.getInstance().addCraft(sunk);
             } else {
                 craft.setLastBlockCheck(System.currentTimeMillis());
             }
@@ -369,10 +372,7 @@ public class AsyncManager extends BukkitRunnable {
             if (craft.getHitBox().isEmpty() || craft.getHitBox() == null) {
                 CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
                 continue;
-            } if ((craft.getHitBox().getMinY() >= 720 || craft.getHitBox().getMinY() <= craft.getType().getIntProperty(CraftType.MIN_HEIGHT_LIMIT))) {
-                CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
-                continue;
-            } if (craft.getWorld().getName().toLowerCase().contains("void") || craft.getWorld().getName().toLowerCase().contains("space") || craft.getWorld().getName().toLowerCase().contains("sector") || craft.getWorld().getName().toLowerCase().contains("zone")) {
+            } if (craft.getHitBox().getMinY() <= -60) {
                 CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
                 continue;
             }

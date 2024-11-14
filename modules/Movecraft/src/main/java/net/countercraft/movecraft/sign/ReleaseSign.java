@@ -34,6 +34,6 @@ public final class ReleaseSign implements Listener{
             return;
         }
         event.setCancelled(true);
-        CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.PLAYER, false);
+        CraftManager.getInstance().removeCraft(craft, CraftReleaseEvent.Reason.PLAYER);
     }
 }
