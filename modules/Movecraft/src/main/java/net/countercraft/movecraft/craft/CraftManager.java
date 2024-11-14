@@ -754,7 +754,6 @@ public class CraftManager implements Iterable<Craft>{
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
         if (c instanceof SinkingCraft) return false;
-        if (c.getOrigBlockCount() >= 256000) return false;
         if (!c.isNotProcessing()) return false;
         if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalEngine = (Integer)c.getDataTag("origin_engine");
@@ -788,7 +787,6 @@ public class CraftManager implements Iterable<Craft>{
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
         if (c instanceof SinkingCraft) return false;
-        if (c.getOrigBlockCount() >= 256000) return false;
         if (!c.isNotProcessing()) return false;
         if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalSize = (Integer)c.getDataTag("origin_size");
@@ -830,7 +828,6 @@ public class CraftManager implements Iterable<Craft>{
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
         if (c instanceof SinkingCraft) return false;
-        if (c.getOrigBlockCount() >= 256000) return false;
         if (!c.isNotProcessing()) return false;
         if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalLift = (Integer)c.getDataTag("origin_lift");
