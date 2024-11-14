@@ -238,9 +238,9 @@ public class RotationTask extends AsyncTask {
                 Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
                 Set<Entity> nearEntites = new HashSet<>();
                 nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
-                        oldHitBox.getXLength() / 2.0 + 2.0,
-                        oldHitBox.getYLength() / 2.0 + 2.0,
-                        oldHitBox.getZLength() / 2.0 + 2.0));
+                        oldHitBox.getXLength() / 2.0 + 1.75,
+                        oldHitBox.getYLength() / 2.0 + 1.75,
+                        oldHitBox.getZLength() / 2.0 + 1.75));
                 nearEntites.addAll(((BaseCraft)craft).getPassengers());
                 for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
                     if (c2.equals(craft)) continue;
@@ -259,8 +259,8 @@ public class RotationTask extends AsyncTask {
                             ((BaseCraft)craft).addPassenger(entity);
                         }
                     }
-                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
-                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
+                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),1.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
                             continue;
                         }
                     }
@@ -284,8 +284,8 @@ public class RotationTask extends AsyncTask {
                     if (entity.getVehicle() != null) continue;
                     if (((entity.getType() == EntityType.PLAYER || entity.getType() == EntityType.PRIMED_TNT) && !craft.getSinking()) || !craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || ((BaseCraft)craft).getPassengers().contains(entity)) {
                         // Player is onboard this craft
-                        if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
-                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),1.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
                             //Movecraft.getInstance().getLogger().warning("Skipping Entity: "+entity+", Not Aboard");
                             continue;
                         }

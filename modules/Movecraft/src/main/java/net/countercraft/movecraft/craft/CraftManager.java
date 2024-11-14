@@ -360,8 +360,8 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public boolean forceBurnFuel(Craft craft, int addAmount, double addChance, boolean forceRun) {
-        if (addAmount <= 0) addAmount = 1;
-        if (addChance <= 0.0d) addChance = 1.0d;
+        if (addAmount <= 1) addAmount = 0;
+        if (addChance <= 1.0d) addChance = 0.0d;
         if (craft.getBurningFuel() > 1) addAmount+=craft.getBurningFuel();
         boolean found = false;
         if (craft.getSinking() || craft instanceof SinkingCraft) return true;
@@ -381,7 +381,7 @@ public class CraftManager implements Iterable<Craft>{
                 wasteItem = event.getWasteItem();
                 fuelBurnChance = event.getFuelBurnChance();
                 istack = event.getBurningFuel();
-                found = this.forceCheckFuel(craft,1+((int)(craft.getCurrentGear()/2)+1)+addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
+                found = this.forceCheckFuel(craft,1+addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
                 if (found) break;
                 iters++;
             }
@@ -426,13 +426,11 @@ public class CraftManager implements Iterable<Craft>{
                             if (chance >= 99) {
                                 stack = reduceItemStack(stack,fuelBurnRate);
                                 inv.setItem(itr,stack);
-                            //    state.update(false,false);
                                 return true;
                             }
                             if ((int)chance <= (int)percBurnChance - 5) {
                                 stack = reduceItemStack(stack,fuelBurnRate);
                                 inv.setItem(itr,stack);
-                            //    state.update(false,false);
                             }
                             return true;
                         }

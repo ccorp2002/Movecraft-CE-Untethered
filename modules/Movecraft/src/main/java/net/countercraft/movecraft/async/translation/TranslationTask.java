@@ -177,7 +177,7 @@ public class TranslationTask extends AsyncTask {
             if (incline > 0) {
                 boolean tooSteep = craft.getType().getIntProperty(CraftType.GRAVITY_INCLINE_DISTANCE) > -1
                         && incline > craft.getType().getIntProperty(CraftType.GRAVITY_INCLINE_DISTANCE);
-                if (tooSteep && craft.getType().getFloatProperty(CraftType.COLLISION_EXPLOSION) <= 0F) {
+                if (tooSteep && craft.getType().getFloatProperty(CraftType.COLLISION_EXPLOSION) < 0F) {
                     fail(I18nSupport.getInternationalisedString("Translation - Failed Incline too steep"));
                     return;
                 }
@@ -433,9 +433,9 @@ public class TranslationTask extends AsyncTask {
             Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
             Set<Entity> nearEntites = new HashSet<>();
             nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
-                    oldHitBox.getXLength() / 2.0 + 2.0,
-                    oldHitBox.getYLength() / 2.0 + 2.0,
-                    oldHitBox.getZLength() / 2.0 + 2.0));
+                    oldHitBox.getXLength() / 2.0 + 1.75,
+                    oldHitBox.getYLength() / 2.0 + 1.75,
+                    oldHitBox.getZLength() / 2.0 + 1.75));
             nearEntites.addAll(((BaseCraft)craft).getPassengers());
             for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
                 if (c2.equals(craft)) continue;
@@ -455,8 +455,8 @@ public class TranslationTask extends AsyncTask {
                         ((BaseCraft)craft).addPassenger(entity);
                     }
                 }
-                if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
-                    if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
+                if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),1.5)) {
+                    if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
                         continue;
                     }
                 }

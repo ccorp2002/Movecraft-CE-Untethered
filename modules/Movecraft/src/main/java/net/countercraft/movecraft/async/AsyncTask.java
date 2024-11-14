@@ -19,6 +19,7 @@ package net.countercraft.movecraft.async;
 
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.PlayerCraft;
 import net.countercraft.movecraft.localisation.I18nSupport;
@@ -52,8 +53,8 @@ public abstract class AsyncTask extends BukkitRunnable {
     }
 
     public boolean checkFuel() {
-        if (craft instanceof PlayerCraft) {
-            return CraftManager.getInstance().forceBurnFuelLater(craft,1,1);
+        if (craft instanceof PlayerCraft && !craft.isAutomated() && (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) < 1.0)) {
+            return CraftManager.getInstance().forceBurnFuel(craft,0,0,false);
         }
         return true;
     }
