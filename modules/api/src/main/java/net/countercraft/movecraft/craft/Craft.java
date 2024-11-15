@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,6 +106,8 @@ public interface Craft {
     MovecraftLocation getBottomCenter();
 
     MovecraftLocation getMidPoint();
+
+    ArrayList<MovecraftLocation> getTrackedMovecraftLocsAboard(@NotNull Object key);
 
     @Deprecated
     boolean isNotProcessing();

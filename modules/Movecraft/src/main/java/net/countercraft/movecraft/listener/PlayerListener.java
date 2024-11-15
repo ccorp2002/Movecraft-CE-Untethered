@@ -193,7 +193,6 @@ public class PlayerListener implements Listener {
               if (!(e.getCraft().isAutomated())) {
                 if (interior != null && interior.size() <= 0) interior = CraftManager.getInstance().detectCraftInterior(craft);
               }
-              craft.setProcessing(true);
               CruiseDirection cdir = CruiseDirection.NONE;
               craft.setCruiseDirection(cdir);
               for (Block block : craft.getBlockName("SIGN")) {
@@ -217,18 +216,16 @@ public class PlayerListener implements Listener {
                       craft.getPhaseBlocks().put(location.toBukkit(craft.getWorld()), Movecraft.getInstance().getWaterBlockData());
                   }
               }
-              craft.setProcessing(true);
               craft.updateLastMoveTime();
               instance.getLogger().info(" Craft ("+craft+")'s Waterlevel: "+waterline);
               if (player != null) instance.getLogger().info(player.getName()+"'s Craft ("+craft+") Interior Hitbox Size: "+interior.size());
               else instance.getLogger().info("NULL's Craft ("+craft+") Interior Hitbox Size: "+interior.size());
-              craft.setProcessing(false);
               craft.updateLastMoveTime();
+              craft.setProcessing(false);
             }
-          }.runTaskLater(instance, 20*3);
+          }.runTaskLater(instance, 20*1);
           instance.getWorldHandler().processLight(craft.getHitBox(),craft.getWorld());
           craft.updateLastMoveTime();
-          craft.setProcessing(true);
           Set<Entity> nearEntites = new HashSet<>();
           nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
                   craft.getHitBox().getXLength() / 2.0 + 2.0,
@@ -283,7 +280,7 @@ public class PlayerListener implements Listener {
         Location toloc = loc.clone();
         Location fromloc = event.getFrom();
 
-        if (!p.hasPermission("movecraft." + craft.getType().getStringProperty(CraftType.NAME) + ".dc")) {
+        if (!p.hasPermission("movecraft." + craft.getType().getStringProperty(CraftType.NAME) + ".move")) {
             p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             return; // Player doesn't have permission = move this craft, so don't do anything
         }

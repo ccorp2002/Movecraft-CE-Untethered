@@ -1,8 +1,8 @@
 # **Movecraft-Community Edition : Unteathered**
 
+### **MUST** be using a Paper/Paper Fork (so like Purpur or something), We're ditching SpigotMC support with this one...
 
 ## Requires at least *Java 21+ & Minecraft 1.20.4-1.21.3*.
-### **MUST** be using a Paper/Paper Fork (so like Purpur or something), We're ditching SpigotMC support with this one...
 
 
 
@@ -19,6 +19,13 @@
 - New `ShipType.craft` Options.
 
 - Improved how movecraft goes about block-setting and sending the changes to nearby players.
+  
+- Simplified/improved `sinkPercent` and  `overallSinkPercent` craft options.
+  >
+  > **sinkPercent** only applies to `flyBlocks`, like normal, however, `sinkPercent` now represents what percent of the flyBlock must be lost before it is to sink.
+  >
+  > **overallSinkPercent** applies to all blocks aboard the craft, and now represents what percent of the total block count must be lost before sinking.
+
 
 - Added back WASD Direct Control, use `/dc` to toggle it.
 
@@ -27,6 +34,7 @@
 - New Total Blockcount Craft-HP Actionbar, displays the amount of Remaining blocks aboard the craft, over the amount of initial blocks. (Non-Air Blocks, in particular)
 
 **API Changes:**
+
 - Added new Fuel-type API/Event.
 - TrackedLocations, used internally for various things, such as tracking Interior Air-Blocks aboard ships (Helps with mitigating the holes in the water), or keeping track of Fuel-Block Locations.
 - Craft DataTags, Allow you to store arbitrary data "aboard" a Craft-Object. Is cleared upon the craft Releasing. Used for storing current Fly-Block & Move-Block count.

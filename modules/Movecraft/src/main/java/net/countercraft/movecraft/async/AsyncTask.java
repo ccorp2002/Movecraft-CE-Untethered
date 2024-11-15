@@ -53,7 +53,7 @@ public abstract class AsyncTask extends BukkitRunnable {
     }
 
     public boolean checkFuel() {
-        if (craft instanceof PlayerCraft && !craft.isAutomated() && (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) < 1.0)) {
+        if (craft instanceof PlayerCraft && !craft.isAutomated() && (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) > 1.0)) {
             return CraftManager.getInstance().forceBurnFuel(craft,0,0,false);
         }
         return true;

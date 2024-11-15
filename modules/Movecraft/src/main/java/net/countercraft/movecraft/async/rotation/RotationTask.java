@@ -238,19 +238,21 @@ public class RotationTask extends AsyncTask {
                 Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
                 Set<Entity> nearEntites = new HashSet<>();
                 nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
-                        oldHitBox.getXLength() / 2.0 + 1.75,
-                        oldHitBox.getYLength() / 2.0 + 1.75,
-                        oldHitBox.getZLength() / 2.0 + 1.75));
+                        oldHitBox.getXLength() / 2.0 + 2.0,
+                        oldHitBox.getYLength() / 2.0 + 2.0,
+                        oldHitBox.getZLength() / 2.0 + 2.0));
                 nearEntites.addAll(((BaseCraft)craft).getPassengers());
                 for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
                     if (c2.equals(craft)) continue;
-                    if (craft.isAutomated()) continue;
                     if (c2 instanceof PilotedCraft) {
-                        ((BaseCraft)c2).removePassenger(craft.getNotificationPlayer());
                         nearEntites.removeAll(((BaseCraft)c2).getPassengers());
                         nearEntites.add(craft.getNotificationPlayer());
                     }
                 }
+            if (craft instanceof PlayerCraft pcraft) {
+                (pcraft).addPassenger(pcraft.getPilot());
+                nearEntites.add(pcraft.getPilot());
+            }
             for (Entity entity : nearEntites) {
                     if (entity == null) continue;
                     if (entity.getVehicle() != null) continue;
@@ -259,7 +261,7 @@ public class RotationTask extends AsyncTask {
                             ((BaseCraft)craft).addPassenger(entity);
                         }
                     }
-                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),1.5)) {
+                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),2.5)) {
                         if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
                             continue;
                         }

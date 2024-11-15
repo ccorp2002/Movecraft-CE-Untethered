@@ -68,8 +68,8 @@ public class DetectionTask implements Supplier<Effect> {
     );
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of(
             new SizeValidator(),
-            new FlyBlockValidator(),
-            new DetectionBlockValidator()
+            new DetectionBlockValidator(),
+            new FlyBlockValidator()
     );
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> VISITED_VALIDATORS = List.of(
             new WaterContactValidator()

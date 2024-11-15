@@ -92,7 +92,7 @@ public class AsyncManager extends BukkitRunnable {
     }
 
     public void addWreck(Craft craft) {
-        if(craft.getCollapsedHitBox().isEmpty() || Settings.FadeWrecksAfter == 0){
+        if(craft.getCollapsedHitBox().isEmpty() || Settings.FadeWrecksAfter <= 0){
             return;
         }
         if (!craft.getSinking()) return;
@@ -132,6 +132,9 @@ public class AsyncManager extends BukkitRunnable {
             // will mark the crafts once it is done with them.
             if (!sentMapUpdate) {
                 clear(c);
+                c.updateLastMoveTime();
+            } else {
+                c.updateLastMoveTime();
             }
         }
     }
@@ -201,7 +204,7 @@ public class AsyncManager extends BukkitRunnable {
             if (craft == null || !craft.isNotProcessing() || !craft.getCruising())
                 continue;
 
-            long ticksElapsed = (System.currentTimeMillis() - craft.getLastCruiseUpdate()) / 50;
+            long ticksElapsed = (System.currentTimeMillis() - craft.getLastCruiseUpdate()) / 40;
             World w = craft.getWorld();
             // if the craft should go slower underwater, make
             // time pass more slowly there
@@ -345,7 +348,7 @@ public class AsyncManager extends BukkitRunnable {
             // if the craft is sinking, let the player
             // know and release the craft. Otherwise
             // update the time for the next check
-            if (status.isSinking() && !craft.getSinking() && !(craft instanceof SinkingCraft)) {
+            if (status.isSinking() && !craft.getSinking()) {
                 Movecraft.getInstance().getLogger().info("Craft is sinking!");
                 craft.getAudience().sendMessage(I18nSupport.getInternationalisedComponent("Player - Craft is sinking"));
                 craft.setCruising(false);
@@ -372,10 +375,14 @@ public class AsyncManager extends BukkitRunnable {
             if (craft.getHitBox().isEmpty() || craft.getHitBox() == null) {
                 CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
                 continue;
-            } if (craft.getHitBox().getMinY() <= -60) {
+            }
+            if (craft.getHitBox().getMinY() <= craft.getWorld().getMinHeight()+4) {
                 CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
                 continue;
             }
+
+            long ticksElapsed = (System.currentTimeMillis() - craft.getLastMoveTime()) / 15;
+            if (ticksElapsed <= craft.getTickCooldown()) continue;
 
             int dx = 0;
             int dz = 0;
@@ -387,6 +394,7 @@ public class AsyncManager extends BukkitRunnable {
             Movecraft.getInstance().getAsyncManager().submitTask(new TranslationTask(craft, craft.getWorld(), dx, -1, dz), craft);
         }
     }
+
     public void forceFadeWrecks() {
         if (true) return;
         List<HitBox> processed = new ArrayList<>();
@@ -577,7 +585,7 @@ public class AsyncManager extends BukkitRunnable {
             overall_sink_percent = ((double)craft.getType().getDoubleProperty(CraftType.OVERALL_SINK_PERCENT)/100.0d);
         int current_lift = 0;
         int current_engine = 0;
-        if (!(craft.getSinking())) {
+        if (!craft.getSinking() || !craft.getDisabled()) {
             if (craft instanceof BaseCraft bcraft) {
                 Integer current_overall_size = (Integer)(bcraft.getDataTag("origin_size"));
                 Integer origin_overall_size = (Integer)(bcraft.getDataTag("current_size"));
@@ -601,25 +609,19 @@ public class AsyncManager extends BukkitRunnable {
                         Movecraft.getInstance().getLogger().info("OVERALL SINK PERCENT: " + overall_sink_percent);
                     }
                 }
-                if (bcraft.isAutomated()) {
-                    if (!bcraft.isAutomated() && !(bcraft.getOrigBlockCount() >= 75_000)) CraftStatus.of(false, false);
-                }
                 if ((!(bcraft.getDisabled()) && disabled_percent > 0.0d) || !isDisabled) {
                     isDisabled = CraftManager.getInstance().detect_engine_disabled(craft);
                 }
                 if (!(bcraft.getSinking()) || !isSinking) {
                     isSinking = CraftManager.getInstance().detect_lift_sinking(craft);
+                    isDisabled = false;
                 }
                 if (!(bcraft.getSinking()) || !isSinking) {
                     isSinking = CraftManager.getInstance().detect_size_sinking(craft);
-                }
-                if (origin_overall_size <= current_overall_size) {
-                    if (bcraft.getDataTag("current_engine") != null && bcraft.getDataTag("current_lift") != null) return CraftStatus.of(false, false);
+                    isDisabled = false;
                 }
             }
         }
-        // And check the OverallSinkPercent
-        //craft.updateMaterials(materials);
         return CraftStatus.of(isSinking, isDisabled);
     }
 }

@@ -368,7 +368,8 @@ public class CraftManager implements Iterable<Craft>{
 
         if (craft.getNotificationPlayer() == null) return true;
 
-        if (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) <= 0.0) return true;
+        if (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) <= 1.0) return true;
+        addAmount += (int)craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE);
         ItemStack wasteItem = this.wasteItem;
         if (craft instanceof PlayerCraftImpl) {
             if (forceRun) addChance = 100d;
@@ -381,7 +382,7 @@ public class CraftManager implements Iterable<Craft>{
                 wasteItem = event.getWasteItem();
                 fuelBurnChance = event.getFuelBurnChance();
                 istack = event.getBurningFuel();
-                found = this.forceCheckFuel(craft,1+addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
+                found = this.forceCheckFuel(craft,addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
                 if (found) break;
                 iters++;
             }
@@ -733,7 +734,6 @@ public class CraftManager implements Iterable<Craft>{
         if (c == null) return;
         if (c instanceof SubCraft) return;
         if (c instanceof SinkingCraft) return;
-        if (c.getOrigBlockCount() >= 256000) return;
         if (!c.isNotProcessing()) return;
         if ((!(c.getDisabled()))) {
             detect_engine_disabled(c);
@@ -749,15 +749,15 @@ public class CraftManager implements Iterable<Craft>{
     public boolean detect_engine_disabled(Craft c) {
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
-        if (c instanceof SinkingCraft) return false;
+        if (c.getSinking()) return false;
         if (!c.isNotProcessing()) return false;
-        if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalEngine = (Integer)c.getDataTag("origin_engine");
         int currentEngine = (Integer)c.getDataTag("current_engine");
         double disabledPerc = c.getType().getDoubleProperty(CraftType.DISABLE_PERCENT);
         int count = 0;
         Set<Material> engineTypes = c.getType().getMoveBlocks();
-        for (final MovecraftLocation b : c.getTrackedMovecraftLocs("engine_locs")) {
+        if (engineTypes.size() <= 0) return false;
+        for (final MovecraftLocation b : c.getTrackedMovecraftLocsAboard("engine_locs")) {
             if (b == null) continue;
             if (engineTypes.contains(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(b,c.getWorld()))) count++;
         }
@@ -765,15 +765,12 @@ public class CraftManager implements Iterable<Craft>{
 
         if (disabledPerc > 1.0) threshold = disabledPerc / 100.0d;
         else threshold = disabledPerc;
-        if (count < currentEngine - 5) {
+        if (count > 0) {
             c.setDataTag("current_engine",(Integer)count);
             currentEngine = count;
         }
         int disableAmount = (int)Math.floor((double)currentEngine * threshold);
-        if (currentEngine >= disableAmount || currentEngine >= originalEngine) return false;
-        if (originalEngine <= 0 || currentEngine <= 0) c.setDisabled(true);
-        if (currentEngine < disableAmount) {
-            c.setDisabled(true);
+        if (currentEngine < disableAmount || currentEngine == 0) {
             return true;
         }
         return false;
@@ -782,9 +779,8 @@ public class CraftManager implements Iterable<Craft>{
     public boolean detect_size_sinking(Craft c) {
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
-        if (c instanceof SinkingCraft) return false;
+        if (c.getSinking()) return false;
         if (!c.isNotProcessing()) return false;
-        if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalSize = (Integer)c.getDataTag("origin_size");
         int currentSize = (Integer)c.getDataTag("current_size");
         double overallSinkPerc = c.getType().getDoubleProperty(CraftType.OVERALL_SINK_PERCENT);
@@ -796,7 +792,7 @@ public class CraftManager implements Iterable<Craft>{
 
         int sinkAmount = (int)Math.floor((double)originalSize * threshold);
         if ((double)threshold > 0.1d) {
-            if (((double)currentSize - (currentSize / 3) < ((double)originalSize)*((double)overallSinkPerc)) && currentSize >= originalSize) {
+            if (((double)currentSize - (currentSize / 1.5) <= ((double)originalSize)*((double)overallSinkPerc)) && currentSize >= originalSize) {
                 try {
                     if (c.getNotificationPlayer() != null) c.getNotificationPlayer().sendActionBar(ChatColor.RED+"BLOCKS :"+ChatColor.RESET+"[ "+ChatColor.DARK_RED+(int)currentSize+ChatColor.RESET+" / "+ChatColor.RED+ChatColor.BOLD+(int)originalSize+ChatColor.RESET+" ]");
                 } catch (Exception exc) {}
@@ -810,29 +806,24 @@ public class CraftManager implements Iterable<Craft>{
                 if (c.getNotificationPlayer() != null) c.getNotificationPlayer().sendActionBar(ChatColor.AQUA+"BLOCKS :"+ChatColor.RESET+"[ "+ChatColor.DARK_AQUA+(int)currentSize+ChatColor.RESET+" / "+ChatColor.AQUA+ChatColor.BOLD+(int)originalSize+ChatColor.RESET+" ]");
             } catch (Exception exc) {}
         }
-        if (currentSize >= originalSize || currentSize >= sinkAmount) return false;
-        if (currentSize <= 0 || originalSize <= 0) c.setDisabled(true);
         if (currentSize < sinkAmount) {
-            c.setDisabled(false);
-            c.setSinking(true);
             return true;
         }
-        c.setSinking(false);
         return false;
     }
 
     public boolean detect_lift_sinking(Craft c) {
         if (c == null) return false;
         if (c instanceof SubCraft) return false;
-        if (c instanceof SinkingCraft) return false;
+        if (c.getSinking()) return false;
         if (!c.isNotProcessing()) return false;
-        if (MathUtils.getNearestPlayer(7500,c.getLocation()) == null) return false;
         int originalLift = (Integer)c.getDataTag("origin_lift");
         int currentLift = (Integer)c.getDataTag("current_lift");
         double liftSinkPerc = c.getType().getDoubleProperty(CraftType.SINK_PERCENT);
         int count = 0;
         Set<Material> liftTypes = c.getType().getFlyBlocks();
-        for (final MovecraftLocation b : c.getTrackedMovecraftLocs("lift_locs")) {
+        if (liftTypes.size() <= 0) return false;
+        for (final MovecraftLocation b : c.getTrackedMovecraftLocsAboard("lift_locs")) {
             if (b == null) continue;
             if (liftTypes.contains(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(b,c.getWorld()))) count++;
         }
@@ -840,20 +831,14 @@ public class CraftManager implements Iterable<Craft>{
 
         if (liftSinkPerc > 1.0) threshold = liftSinkPerc / 100.0d;
         else threshold = liftSinkPerc;
-        if (count < currentLift - 5) {
+        if (count > 0) {
             c.setDataTag("current_lift",(Integer)count);
             currentLift = count;
         }
         int sinkAmount = (int)Math.floor((double)originalLift * threshold);
-        if (currentLift >= originalLift || currentLift >= sinkAmount) return false;
-        if (currentLift <= 0 || originalLift <= 0) c.setDisabled(true);
-        if (currentLift >= originalLift) return false;
         if (currentLift < sinkAmount) {
-            c.setDisabled(false);
-            c.setSinking(true);
             return true;
         }
-        c.setSinking(false);
         return false;
     }
 

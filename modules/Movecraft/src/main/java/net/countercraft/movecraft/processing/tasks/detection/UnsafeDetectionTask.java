@@ -63,7 +63,9 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
             new NameSignValidator(),
             new PilotSignValidator()
     );
-    private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of();
+    private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of(
+            new DetectionBlockValidator()
+        );
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> VISITED_VALIDATORS = List.of();
 
 

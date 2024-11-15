@@ -277,7 +277,7 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         getCommand("manoverboard").setExecutor(new ManOverboardCommand());
         getCommand("dc").setExecutor(new DirectControlCommand());
         getCommand("crew").setExecutor(new CrewCommand());
-        //getCommand("contacts").setExecutor(new ContactsCommand());
+        getCommand("contacts").setExecutor(new ContactsCommand());
         getCommand("scuttle").setExecutor(new ScuttleCommand());
         getCommand("crafttype").setExecutor(new CraftTypeCommand());
         getCommand("craftinfo").setExecutor(new CraftInfoCommand());

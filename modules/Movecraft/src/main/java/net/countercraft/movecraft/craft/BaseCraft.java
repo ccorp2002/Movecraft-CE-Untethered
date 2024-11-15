@@ -1,6 +1,7 @@
 package net.countercraft.movecraft.craft;
 
 import net.countercraft.movecraft.*;
+import net.countercraft.movecraft.util.radar.RadarMap;
 import net.countercraft.movecraft.async.rotation.RotationTask;
 import net.countercraft.movecraft.async.translation.TranslationTask;
 import net.countercraft.movecraft.config.Settings;
@@ -49,7 +50,7 @@ public abstract class BaseCraft implements Craft {
     @Nullable
     public final Set<Entity> passengers = new HashSet<>();
     @Nullable
-    public Set<Craft> contacts = new HashSet<>();
+    private Set<Craft> contacts = new HashSet<>();
     @NotNull
     public HitBox hitBox;
     @NotNull
@@ -66,7 +67,7 @@ public abstract class BaseCraft implements Craft {
     private long lastTeleportTime;
     private int lastDX, lastDY, lastDZ;
     private int currentGear = 1;
-    private int burningFuel = 2;
+    private int burningFuel = 0;
     private int fuel = this.burningFuel;
     private int origBlockCount;
     @Nullable
@@ -541,7 +542,6 @@ public abstract class BaseCraft implements Craft {
 
         Movecraft.getInstance().getAsyncManager().submitTask(new TranslationTask(this, world, dx, dy, dz), this);
 
-        updateLastMoveTime();
         setLastTranslation(new MovecraftLocation(dx, dy, dz));
     }
 
@@ -664,7 +664,10 @@ public abstract class BaseCraft implements Craft {
         final HashSet<MovecraftLocation> trackedLocs = new HashSet<>();
         if (!getRawTrackedMap().containsKey(key))
             return trackedLocs;
-        for (TrackedLocation o : getTrackedLocations(key)) {
+        boolean bool = false;
+        if (key instanceof Material) bool = true;
+        if (key instanceof BlockData) bool = true;
+        for (TrackedLocation o : getTrackedLocations(key,bool)) {
             trackedLocs.add((MovecraftLocation)((TrackedLocation)o).getLocation());
         }
         return trackedLocs;
@@ -683,6 +686,7 @@ public abstract class BaseCraft implements Craft {
         for (TrackedLocation o : getRawTrackedMap().get(key)) {
             if (isAboard) {
                 if (!this.hitBox.contains(o.getLocation())) continue;
+                if (o.toBukkit(getWorld()).getBlock().getType().isAir()) continue;
             }
             trackedLocs.add(o);
         }
@@ -784,7 +788,6 @@ public abstract class BaseCraft implements Craft {
         }
         if (!isNotProcessing()) return;
         Movecraft.getInstance().getAsyncManager().submitTask(new RotationTask(this, originPoint, rotation, getWorld(), isSubCraft), this);
-        updateLastMoveTime();
         setLastRotateTime(System.currentTimeMillis());
     }
     /**
@@ -795,7 +798,8 @@ public abstract class BaseCraft implements Craft {
     @NotNull
     
     public Set<Craft> getContacts() {
-        contacts.clear();
+        
+        contacts = RadarMap.getRadarContacts(this);
         /*for (Craft contact : CraftManager.getInstance().getCraftsInWorld(w)) {
             MovecraftLocation ccenter = getHitBox().getMidPoint();
             MovecraftLocation tcenter = contact.getHitBox().getMidPoint();

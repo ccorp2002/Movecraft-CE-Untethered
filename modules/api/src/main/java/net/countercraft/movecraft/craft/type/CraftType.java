@@ -493,7 +493,7 @@ final public class CraftType {
         registerProperty(new PerWorldProperty<>("perWorldUnderWaterDetectionMultiplier",
                 PER_WORLD_UNDERWATER_DETECTION_MULTIPLIER,
                 (type, worldName) -> type.getDoubleProperty(UNDERWATER_DETECTION_MULTIPLIER)));
-        registerProperty(new DoubleProperty("sinkSpeed", SINK_SPEED, type -> 1D));
+        registerProperty(new DoubleProperty("sinkSpeed", SINK_SPEED, type -> 5D));
         registerProperty(new IntegerProperty("sinkRateTicks", SINK_RATE_TICKS,
                 type -> (int) Math.max(120,Math.ceil(20 / type.getDoubleProperty(SINK_SPEED)))));
         registerProperty(new BooleanProperty("keepMovingOnSink", KEEP_MOVING_ON_SINK, type -> false));

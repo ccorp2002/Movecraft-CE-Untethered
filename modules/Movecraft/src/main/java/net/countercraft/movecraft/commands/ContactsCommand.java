@@ -27,6 +27,10 @@ public class ContactsCommand implements CommandExecutor {
             commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + I18nSupport.getInternationalisedString("Contacts - Must Be Player"));
             return true;
         }
+        if (!commandSender.hasPermission("movecraft.commands.contacts")) {
+            commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + I18nSupport.getInternationalisedString("Insufficient Permissions"));
+            return true;
+        }
         Player player = (Player) commandSender;
 
         if (CraftManager.getInstance().getCraftByPlayer(player) == null) {

@@ -24,29 +24,30 @@ public class DetectionBlockValidator implements DetectionPredicate<Map<Material,
         int total = materialDequeMap.values().parallelStream().mapToInt(Deque::size).sum();
         for (RequiredBlockEntry entry : type.getRequiredBlockProperty(CraftType.DETECTION_BLOCKS)) {
             int count = 0;
-            for (Material material : entry.getMaterials()) {
-                if (!materialDequeMap.containsKey(material))
+            for(Material material : entry.getMaterials()) {
+                if(!materialDequeMap.containsKey(material)) {
                     continue;
-
+                }
                 count += materialDequeMap.get(material).size();
             }
 
             var result = entry.detect(count, total);
-            if (result.getLeft() == RequiredBlockEntry.DetectionResult.SUCCESS)
+            if(result.getLeft() == RequiredBlockEntry.DetectionResult.SUCCESS)
                 continue;
 
             String failMessage = "";
             switch (result.getLeft()) {
                 case NOT_ENOUGH:
-                    failMessage += I18nSupport.getInternationalisedString("Detection - Not enough detectionblock");
+                    failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    failMessage += " (Too Few!)";
                     break;
                 case TOO_MUCH:
-                    failMessage += I18nSupport.getInternationalisedString("Detection - Too much detectionblock");
+                    failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    failMessage += " (Too Many!)";
                     break;
                 default:
                     break;
             }
-            failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
             return Result.failWithMessage(failMessage);
         }
         return Result.succeed();

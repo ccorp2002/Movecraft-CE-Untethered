@@ -163,12 +163,17 @@ public class BlockListener implements Listener {
         final Block block = movecraftLocation.toBukkit(craft.getWorld()).getBlock();
         craft.updateLastMoveTime();
         craft.removeBlock(block);
+        if (Tags.FRAGILE_MATERIALS.contains(block.getType())) {
+            block.setType(Material.AIR,true);
+        }
     }
 
     public static void tryRemoveBlock(final Block block, final Craft craft) {
-        final MovecraftLocation movecraftLocation = MathUtils.bukkit2MovecraftLoc(block.getLocation());
         craft.updateLastMoveTime();
         craft.removeBlock(block);
+        if (Tags.FRAGILE_MATERIALS.contains(block.getType())) {
+            block.setType(Material.AIR,true);
+        }
     }
 
     // process certain redstone on cruising crafts
