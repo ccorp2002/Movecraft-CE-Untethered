@@ -114,8 +114,6 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
     private Effect detectInterior(Craft craft) {
         craft.setDataTag("origin_size",craft.getOrigBlockCount());
         craft.setDataTag("current_size",craft.getOrigBlockCount());
-        if (craft.isAutomated()) return () -> {};
-        if (craft.getOrigBlockCount() >= 125000) return () -> {};
         if (!craft.getType().getBoolProperty(CraftType.DETECT_INTERIOR)) return () -> {};
         final WorldHandler handler = Movecraft.getInstance().getWorldHandler();
         final World badWorld = WorldManager.INSTANCE.executeMain(craft::getWorld);
@@ -144,6 +142,7 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
         for (HitBox hitBox : surfaces) {
             validExterior.addAll(hitBox.difference(craft.getHitBox()));
         }
+        //Check to see which locations in the from set are actually outside of the craft
 
         final SetHitBox visited = new SetHitBox();
         for (final MovecraftLocation location : validExterior) {
@@ -190,21 +189,20 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
                 }
             }
         }
-        if (craft.getHitBox().size() >= interiorSet.size()) {
+        if (craft.getHitBox().size()*1.75 >= interiorSet.size()) {
             interior.addAll(interiorSet);
             craft.setTrackedMovecraftLocs("air",interiorSet);
             craft.setHitBox(craft.getHitBox().union(interior));
-            if (waterLine != -64 && waterLine != -128) return () -> {};
-            var waterData = Movecraft.getInstance().getWaterBlockData();
-            return () -> {
-                for (MovecraftLocation location : craft.getHitBox()) {
-                    if (location.getY() <= waterLine) {
-                        craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
-                    }
-                }
-            };
         }
-        return () -> {};
+        if (waterLine != -64 && waterLine != -128) return () -> {};
+        var waterData = Movecraft.getInstance().getWaterBlockData();
+        return () -> {
+            for (MovecraftLocation location : craft.getHitBox()) {
+                if (location.getY() <= waterLine) {
+                    craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+                }
+            }
+        };
     }
 
     @NotNull

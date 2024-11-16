@@ -156,7 +156,7 @@ public class PlayerListener implements Listener {
           e.setCancelled(true);
       }
       if ((e.isCancelled())) {
-        if ((e.getCraft() instanceof PlayerCraftImpl)) return;
+        if (!(e.getCraft() instanceof PlayerCraftImpl)) return;
         CraftManager.getInstance().forceRemoveCraft(e.getCraft());
         return;
       }

@@ -103,7 +103,7 @@ public class CraftTranslateCommand extends UpdateCommand {
             }
         }
         boolean ran = false;
-        if ((waterline <= -127) || craft.getOrigBlockCount()>=560000 || (world.getName().contains("Void") || world.getName().contains("Orbit") || world.getName().contains("Space")) || displacement.getY() >= 360 || craft.getHitBox().getMinY() >= 360 || (!craft.getType().getBoolProperty(CraftType.DETECT_INTERIOR))) {
+        if ((waterline <= -127)) {
 
             /*if (craft.getWorld().equals(world)) {
                 ran = handler.runTaskInWorld(() -> {

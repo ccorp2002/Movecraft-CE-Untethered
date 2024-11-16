@@ -20,11 +20,14 @@
 
 - Improved how movecraft goes about block-setting and sending the changes to nearby players.
   
-- Simplified/improved `sinkPercent` and  `overallSinkPercent` craft options.
+- Simplified/improved `sinkPercent` and `overallSinkPercent` craft options.
+- Adds a `disablePercent` craft option, which determines the remaining percentage of all `moveBlocks`, before becoming *immobilized*.
   >
-  > **sinkPercent** only applies to `flyBlocks`, like normal, however, `sinkPercent` now represents what percent of the flyBlock must be lost before it is to sink.
+  > **sinkPercent** only applies to `flyBlocks`, like normal, however, `sinkPercent` now represents what percent of the original `flyBlock` must be remaining before sinking.
   >
-  > **overallSinkPercent** applies to all blocks aboard the craft, and now represents what percent of the total block count must be lost before sinking.
+  > **overallSinkPercent** applies to all blocks aboard the craft, and now represents what percent of the original block count must be remaining before sinking.
+  >
+  > **disablePercent** applies to all `moveBlocks` aboard the craft, and now represents what percent of the initial `moveBlock` count must be remaining before becoming disabled.
 
 
 - Added back WASD Direct Control, use `/dc` to toggle it.

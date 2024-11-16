@@ -216,8 +216,6 @@ public class DetectionTask implements Supplier<Effect> {
     private Effect detectInterior(Craft craft) {
         craft.setDataTag("origin_size",craft.getOrigBlockCount());
         craft.setDataTag("current_size",craft.getOrigBlockCount());
-        if (craft.isAutomated()) return () -> {};
-        if (craft.getOrigBlockCount() >= 125000) return () -> {};
         if (!craft.getType().getBoolProperty(CraftType.DETECT_INTERIOR)) return () -> {};
         final WorldHandler handler = Movecraft.getInstance().getWorldHandler();
         final World badWorld = WorldManager.INSTANCE.executeMain(craft::getWorld);
@@ -293,21 +291,20 @@ public class DetectionTask implements Supplier<Effect> {
                 }
             }
         }
-        if (craft.getHitBox().size()+(craft.getHitBox().size()/4) >= interiorSet.size()) {
+        if (craft.getHitBox().size()*1.75 >= interiorSet.size()) {
             interior.addAll(interiorSet);
             craft.setTrackedMovecraftLocs("air",interiorSet);
             craft.setHitBox(craft.getHitBox().union(interior));
-            if (waterLine != -64 && waterLine != -128) return () -> {};
-            var waterData = Movecraft.getInstance().getWaterBlockData();
-            return () -> {
-                for (MovecraftLocation location : craft.getHitBox()) {
-                    if (location.getY() <= waterLine) {
-                        craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
-                    }
-                }
-            };
         }
-        return () -> {};
+        if (waterLine != -64 && waterLine != -128) return () -> {};
+        var waterData = Movecraft.getInstance().getWaterBlockData();
+        return () -> {
+            for (MovecraftLocation location : craft.getHitBox()) {
+                if (location.getY() <= waterLine) {
+                    craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+                }
+            }
+        };
     }
 
     private void frontier() {

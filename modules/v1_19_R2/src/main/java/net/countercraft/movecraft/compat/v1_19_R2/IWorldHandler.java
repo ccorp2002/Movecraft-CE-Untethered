@@ -141,7 +141,7 @@ public class IWorldHandler extends WorldHandler {
         //MovecraftLocation.sendBlockUpdated(craft,sendAir);
         //create the new block
         for (Map.Entry<BlockPos, BlockState> entry : blockData.entrySet()) {
-            setBlockFast(nativeWorld, rotatedPositions.get(entry.getKey()), entry.getValue());
+            setBlockFastest(nativeWorld, rotatedPositions.get(entry.getKey()), entry.getValue());
             if (isRedstoneComponent(entry.getValue().getBlock())) redstoneComps.put(rotatedPositions.get(entry.getKey()), entry.getValue()); //Determine Redstone Blocks
         }
 
@@ -164,7 +164,7 @@ public class IWorldHandler extends WorldHandler {
         //TODO: add support for pass-through
         Collection<BlockPos> deletePositions = CollectionUtils.filter(rotatedPositions.keySet(), rotatedPositions.values());
         for (BlockPos position : deletePositions) {
-            setBlockFast(nativeWorld, position, Blocks.AIR.defaultBlockState());
+            setBlockFastest(nativeWorld, position, Blocks.AIR.defaultBlockState());
         }
         processLight(craft.getHitBox(),craft.getWorld());
         processRedstone(redstoneComps.keySet(), nativeWorld);
@@ -227,7 +227,7 @@ public class IWorldHandler extends WorldHandler {
         for (int i = 0, positionSize = newPositions.size(); i < positionSize; i++) {
             final BlockState data = blockData.get(i);
             final BlockPos position = newPositions.get(i);
-            setBlockFast(nativeWorld, position, data);
+            setBlockFastest(nativeWorld, position, data);
             if (isRedstoneComponent(nativeWorld.getBlockState(position).getBlock())) redstoneComps.add(position); //Determine Redstone Blocks
         }
         //*******************************************
@@ -248,7 +248,7 @@ public class IWorldHandler extends WorldHandler {
         List<BlockPos> deletePositions = positions;
         if (oldNativeWorld == nativeWorld) deletePositions = CollectionUtils.filter(positions,newPositions);
         for (BlockPos position : deletePositions) {
-            setBlockFast(oldNativeWorld, position, Blocks.AIR.defaultBlockState());
+            setBlockFastest(oldNativeWorld, position, Blocks.AIR.defaultBlockState());
         }
 
         //*******************************************
@@ -386,8 +386,7 @@ public class IWorldHandler extends WorldHandler {
         if (chunk.blockEntities.get(position) != null || data.equals(Blocks.AIR.defaultBlockState())) {
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
           //  ((ServerLevel)world).getChunkSource().blockChanged(position);
-            //((ServerLevel)world).sendBlockUpdated(position, data, data, 3);
-            ((ServerLevel)world).getChunkSource().blockChanged(position);
+            ((ServerLevel)world).sendBlockUpdated(position, data, data, 3);
         } else {
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
           //  ((ServerLevel)world).getChunkSource().blockChanged(position);
@@ -535,9 +534,11 @@ public class IWorldHandler extends WorldHandler {
         tile.setLevel(nativeWorld);
         tile.clearRemoved();
         if (nativeWorld.captureBlockStates) {
+            setBlockFastest(nativeWorld,newPosition,tile.getBlockState());
             nativeWorld.capturedTileEntities.put(newPosition, tile);
             return;
         }
+        setBlockFastest(nativeWorld,newPosition,tile.getBlockState());
         chunk.setBlockEntity(tile);
         chunk.blockEntities.put(newPosition, tile);
     }

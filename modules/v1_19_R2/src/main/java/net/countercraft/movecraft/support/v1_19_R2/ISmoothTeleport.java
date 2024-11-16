@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+import io.papermc.paper.entity.TeleportFlag;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -75,7 +76,6 @@ public class ISmoothTeleport extends SmoothTeleport {
         yawField = ReflectUtils.getField(entityClass, "aB"); // xRot
         pitchField = ReflectUtils.getField(entityClass, "aA"); // yRot
     }
-
     public void teleport(Entity entity, @NotNull Location location, float yawChange, float pitchChange) {
         if (entity instanceof Player player) {
             double x = location.getX();
