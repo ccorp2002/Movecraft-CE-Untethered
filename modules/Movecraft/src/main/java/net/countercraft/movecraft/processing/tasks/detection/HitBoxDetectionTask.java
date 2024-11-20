@@ -20,6 +20,7 @@ import net.countercraft.movecraft.util.AtomicLocationSet;
 import net.countercraft.movecraft.util.CollectionUtils;
 import net.countercraft.movecraft.util.Tags;
 import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
+import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
 import net.countercraft.movecraft.util.hitboxes.SetHitBox;
 import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
@@ -186,11 +187,8 @@ public class HitBoxDetectionTask implements Supplier<Effect> {
                 }
             }
         }
-        if (craft.getHitBox().size()*1.75 >= interiorSet.size()) {
-            interior.addAll(interiorSet);
-            craft.setTrackedMovecraftLocs("air",interiorSet);
-            craft.setHitBox(craft.getHitBox().union(interior));
-        }
+        craft.setTrackedMovecraftLocs("air",interiorSet);
+        ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
         if (waterLine != -64 && waterLine != -128) return () -> {};
         var waterData = Movecraft.getInstance().getWaterBlockData();
         return () -> {

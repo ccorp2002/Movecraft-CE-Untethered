@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>net.countercraft</groupId>
-            <artifactId>movecraft-v1_19_r2</artifactId>
+            <artifactId>movecraft-v1_19_r3</artifactId>
             <version>${revision}</version>
             <optional>true</optional> <!-- value will be true or false only -->
             <type>jar</type>
@@ -204,7 +204,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
                                 <filter>
-                                    <artifact>net.countercraft:movecraft-v1_19_r2</artifact>
+                                    <artifact>net.countercraft:movecraft-v1_19_r3</artifact>
                                     <includes>
                                         <include>**</include>
                                     </includes>

@@ -1,4 +1,4 @@
-package net.countercraft.movecraft.compat.v1_19_R2;
+package net.countercraft.movecraft.compat.v1_19_R3;
 
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
@@ -48,12 +48,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftInventoryView;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_19_R2.util.RandomSourceWrapper;
+import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R3.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R3.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftInventoryView;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R3.util.RandomSourceWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -154,7 +154,7 @@ public class IWorldHandler extends WorldHandler {
             moveBlockEntity(nativeWorld, rotatedPositions.get(tileHolder.getTilePosition()), tileHolder.getTile());
             if (tileHolder.getNextTick() == null)
                 continue;
-            final long currentTime = nativeWorld.N.getGameTime();
+            final long currentTime = nativeWorld.J.getGameTime();
             nativeWorld.getBlockTicks().schedule(new ScheduledTick<>((Block) tileHolder.getNextTick().type(), rotatedPositions.get(tileHolder.getNextTick().pos()), tileHolder.getNextTick().triggerTick() - currentTime, tileHolder.getNextTick().priority(), tileHolder.getNextTick().subTickOrder()));
         }
 
@@ -313,7 +313,7 @@ public class IWorldHandler extends WorldHandler {
         final ServerLevel world = ((CraftWorld) loc.getWorld()).getHandle();
         LevelChunk chunk = (LevelChunk) ((ServerLevel)world).getChunkIfLoaded(pos.getX()>>4,pos.getZ()>>4);
         if (chunk == null) chunk = world.getChunkAt(pos);
-        final org.bukkit.Chunk bukkitChunk = new org.bukkit.craftbukkit.v1_19_R2.CraftChunk(chunk);
+        final org.bukkit.Chunk bukkitChunk = new org.bukkit.craftbukkit.v1_19_R3.CraftChunk(chunk);
         return bukkitChunk;
     }
     @Nullable
@@ -525,7 +525,7 @@ public class IWorldHandler extends WorldHandler {
     private void moveBlockEntity(@NotNull Level nativeWorld, @NotNull BlockPos newPosition, @NotNull BlockEntity tile) {
         LevelChunk chunk = nativeWorld.getChunkAt(newPosition);
         try {
-            var positionField = BlockEntity.class.getDeclaredField("o"); // o is obfuscated worldPosition
+            var positionField = BlockEntity.class.getDeclaredField("p"); // p is obfuscated worldPosition
             UnsafeUtils.setField(positionField, tile, newPosition);
         }
         catch (NoSuchFieldException e) {
