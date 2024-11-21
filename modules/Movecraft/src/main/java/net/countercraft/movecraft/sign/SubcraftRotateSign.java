@@ -5,9 +5,21 @@ import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.SubCraft;
+import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.SubCraftImpl;
+import net.countercraft.movecraft.craft.SubcraftRotateCraft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
 import net.countercraft.movecraft.craft.type.CraftType;
+import net.countercraft.movecraft.events.CraftPilotEvent;
+import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.processing.functions.Result;
+import net.countercraft.movecraft.util.Pair;
+import net.countercraft.movecraft.async.rotation.RotationTask;
+import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -100,16 +112,49 @@ public final class SubcraftRotateSign implements Listener {
         }
         final Craft playerCraft = pcraft;
         rotating.add(startPoint);
-        playerCraft.setProcessing(true);
-        CraftManager.getInstance().forceSubCraftRotate(craftType,event.getClickedBlock(),player,rotation);
+        if (playerCraft != null) playerCraft.setProcessing(true);
+        CraftManager.getInstance().detect(
+                startPoint,
+                craftType, (type, w, p, parents) -> {
+                    if (parents.size() > 1)
+                        return new Pair<>(Result.failWithMessage(I18nSupport.getInternationalisedString(
+                                "Detection - Failed - Already commanding a craft")), null);
+                    if (parents.size() < 1)
+                        return new Pair<>(Result.succeed(), new SubcraftRotateCraft(type, w, p));
+
+                    Craft parent = parents.iterator().next();
+                    return new Pair<>(Result.succeed(), new SubCraftImpl(type, w, parent));
+                },
+                world, player, player,
+                craft -> () -> {
+                    Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.SUB_CRAFT));
+                    if (craft instanceof SubCraft) { // Subtract craft from the parent
+                        Craft parent = ((SubCraft) craft).getParent();
+                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());;
+                        parent.setHitBox(newHitbox);
+                    }
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            craft.rotate(rotation, startPoint, true);
+                            if (craft instanceof SubCraft) {
+                                Craft parent = ((SubCraft) craft).getParent();
+                                var newHitbox = parent.getHitBox().union(craft.getHitBox());
+                                parent.setHitBox(newHitbox);
+                            }
+                            CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUB_CRAFT, false);
+                        }
+                    }.runTaskLater(Movecraft.getInstance(), 3);
+                }
+        );
         event.setCancelled(true);
-        if (playerCraft == null) rotating.remove(startPoint);
         new BukkitRunnable() {
             @Override
             public void run() {
                 rotating.remove(startPoint);
-                playerCraft.setProcessing(false);
+                if (playerCraft != null) playerCraft.setProcessing(false);
             }
-        }.runTaskLater(Movecraft.getInstance(), 1);
+        }.runTaskLater(Movecraft.getInstance(), 4);
     }
 }
