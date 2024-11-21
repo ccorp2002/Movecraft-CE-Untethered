@@ -207,51 +207,6 @@ public class CraftManager implements Iterable<Craft>{
       return fuelTypeChance.get(indx);
     }
 
-    public Collection<MovecraftLocation> getBlockDataAsync(Craft craft, BlockData bkd){
-        final ArrayList<MovecraftLocation> locs = new ArrayList<>();
-        for (MovecraftLocation l : craft.getHitBox()){
-            if (craft.getMovecraftWorld().getData(l).equals(bkd)) {
-                locs.add(l);
-            }
-        }
-        craft.setTrackedMovecraftLocs(locs,bkd);
-        return locs;
-    }
-
-    public Collection<MovecraftLocation> getMaterialAsync(Craft craft, Material mat){
-        final ArrayList<MovecraftLocation> locs = new ArrayList<>();
-        for (MovecraftLocation l : craft.getHitBox()){
-            if (craft.getMovecraftWorld().getMaterial(l) == mat) {
-                locs.add(l);
-            }
-        }
-        craft.setTrackedMovecraftLocs(locs,mat);
-        return locs;
-    }
-
-    public void detectCraftHealthBlocksAsync(Craft craft) {
-        Set<MovecraftLocation> origin_lift = Sets.newHashSet();
-        Set<MovecraftLocation> origin_engine = Sets.newHashSet();
-        for (RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.FLY_BLOCKS)) {
-            for (Material mat : entry.getMaterials()) {
-                origin_lift.addAll((getMaterialAsync(craft,mat)));
-            }
-        }
-        craft.setDataTag("radar_range",(Double)125d);
-        craft.setDataTag("radar_profile",(Double)360d);
-        craft.setDataTag("origin_lift",(Integer)(origin_lift.size()));
-        craft.setDataTag("current_lift", (Integer)(origin_lift.size()));
-        craft.setTrackedMovecraftLocs(origin_lift,"lift_locs");
-        for(RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.MOVE_BLOCKS)) {
-            for (Material mat : entry.getMaterials()) {
-                origin_engine.addAll((getMaterialAsync(craft,mat)));
-            }
-        }
-        craft.setDataTag("origin_engine", (Integer)(origin_engine.size()));
-        craft.setDataTag("current_engine", (Integer)(origin_engine.size()));
-        craft.setTrackedMovecraftLocs(origin_engine,"engine_locs");
-    }
-
     public void detectCraftHealthBlocks(Craft craft) {
         Set<Block> origin_lift = Sets.newHashSet();
         Set<Block> origin_engine = Sets.newHashSet();
