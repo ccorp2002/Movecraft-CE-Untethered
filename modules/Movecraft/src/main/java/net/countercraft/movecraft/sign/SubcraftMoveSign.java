@@ -176,7 +176,7 @@ public final class SubcraftMoveSign implements Listener {
                 world, null,
                 Movecraft.getAdventure().player(player),
                 craft -> () -> {
-                    Bukkit.getServer().getPluginManager().callEvent(new CraftDetectEvent(craft, startPoint));
+                    Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.SUB_CRAFT));
                     craft.setProcessing(false);
                     if (craft instanceof SubCraftImpl) { // Subtract craft from the parent
                         BaseCraft parent = (BaseCraft)((SubCraftImpl)craft).getParent();
@@ -215,6 +215,6 @@ public final class SubcraftMoveSign implements Listener {
                 playerCraft.setProcessing(false);
                 rotating.remove(startPoint);
             }
-        }.runTaskLater(Movecraft.getInstance(), 1);
+        }.runTaskLater(Movecraft.getInstance(), 5);
     }
 }
