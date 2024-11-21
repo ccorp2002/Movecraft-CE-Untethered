@@ -164,13 +164,13 @@ public class RotationTask extends AsyncTask {
             }
             if (!ran) {
                 final Set<MovecraftChunk> chunksToLoad = ChunkManager.getChunks(oldHitBox, craft.getWorld());
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()
                 chunksToLoad.clear();
                 chunksToLoad.addAll(ChunkManager.getChunks(newHitBox, craft.getWorld(), 0, 0, 0));
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()

@@ -139,13 +139,13 @@ public class TranslationTask extends AsyncTask {
         // ensure chunks are loaded only if world is different or change in location is
         // large
         final Set<MovecraftChunk> chunksToLoad = ChunkManager.getChunks(oldHitBox, craft.getWorld());
-        MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
+        MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
         ChunkManager.checkChunks(chunksToLoad);
         if (!chunksToLoad.isEmpty())
             ChunkManager.addChunksToLoad(chunksToLoad);//.get()
         chunksToLoad.clear();
         chunksToLoad.addAll(ChunkManager.getChunks(oldHitBox, world, dx, dy, dz));
-        MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
+        MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
         ChunkManager.checkChunks(chunksToLoad);
         if (!chunksToLoad.isEmpty())
             ChunkManager.addChunksToLoad(chunksToLoad);//.get()
@@ -429,6 +429,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
         }
+        updates.add(new CraftTranslateCommand(craft, displacement, world));
         if (!(craft.getSinking() && craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS)) && craft.getType().getBoolProperty(CraftType.MOVE_ENTITIES)) {
             Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
             Set<Entity> nearEntites = new HashSet<>();
@@ -492,7 +493,6 @@ public class TranslationTask extends AsyncTask {
                 // not necessary to release cruiseonpilot crafts, because they will already be released
                 CraftManager.getInstance().addReleaseTask(craft);
         }
-        updates.add(new CraftTranslateCommand(craft, displacement, world));
         captureYield(harvestedBlocks);
     }
 

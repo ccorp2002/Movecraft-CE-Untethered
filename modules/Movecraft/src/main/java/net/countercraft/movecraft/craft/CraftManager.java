@@ -154,13 +154,13 @@ public class CraftManager implements Iterable<Craft>{
     public static World getWorldOffMain(Craft craft) {
         World badWorld = null;
         if (!Bukkit.isPrimaryThread()) {
-        try {
-            badWorld = craft.getMovecraftWorld().getWorld();
-        } catch (Exception exc) {
-            badWorld = craft.getWorld();
-        }
+            try {
+                badWorld = craft.getMovecraftWorld().getWorld();
+            } catch (Exception exc) {
+                badWorld = craft.getWorld();
+            }
         } else {
-        badWorld = craft.getWorld();
+            badWorld = craft.getWorld();
         }
         if (badWorld == null) badWorld = craft.getWorld();
         return badWorld;
@@ -230,7 +230,8 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public void detectCraftHealthBlocksAsync(Craft craft) {
-        ArrayList<MovecraftLocation> origin_lift = new ArrayList<>();
+        Set<MovecraftLocation> origin_lift = Sets.newHashSet();
+        Set<MovecraftLocation> origin_engine = Sets.newHashSet();
         for (RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.FLY_BLOCKS)) {
             for (Material mat : entry.getMaterials()) {
                 origin_lift.addAll((getMaterialAsync(craft,mat)));
@@ -241,7 +242,6 @@ public class CraftManager implements Iterable<Craft>{
         craft.setDataTag("origin_lift",(Integer)(origin_lift.size()));
         craft.setDataTag("current_lift", (Integer)(origin_lift.size()));
         craft.setTrackedMovecraftLocs(origin_lift,"lift_locs");
-        ArrayList<MovecraftLocation> origin_engine = new ArrayList<>();
         for(RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.MOVE_BLOCKS)) {
             for (Material mat : entry.getMaterials()) {
                 origin_engine.addAll((getMaterialAsync(craft,mat)));
@@ -253,7 +253,8 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public void detectCraftHealthBlocks(Craft craft) {
-        ArrayList<Block> origin_lift = new ArrayList<>();
+        Set<Block> origin_lift = Sets.newHashSet();
+        Set<Block> origin_engine = Sets.newHashSet();
         for (RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.FLY_BLOCKS)) {
             for (Material mat : entry.getMaterials()) {
                 origin_lift.addAll(((craft).getBlockType(mat)));
@@ -264,7 +265,6 @@ public class CraftManager implements Iterable<Craft>{
         craft.setDataTag("origin_lift",(Integer)(origin_lift.size()));
         craft.setDataTag("current_lift", (Integer)(origin_lift.size()));
         craft.setTrackedBlocks(origin_lift,"lift_locs");
-        ArrayList<Block> origin_engine = new ArrayList<>();
         for(RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.MOVE_BLOCKS)) {
             for (Material mat : entry.getMaterials()) {
                 origin_engine.addAll(((craft).getBlockType(mat)));
