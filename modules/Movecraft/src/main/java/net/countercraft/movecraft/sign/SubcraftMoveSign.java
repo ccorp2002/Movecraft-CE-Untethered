@@ -63,7 +63,7 @@ public final class SubcraftMoveSign implements Listener {
         Location loc = event.getClickedBlock().getLocation();
         final MovecraftLocation startPoint = new MovecraftLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         if (rotating.contains(startPoint)) {
-            event.getPlayer().sendMessage("You are already Moving");
+            event.getPlayer().sendMessage("You are already moving!");
             event.setCancelled(true);
             return;
         }

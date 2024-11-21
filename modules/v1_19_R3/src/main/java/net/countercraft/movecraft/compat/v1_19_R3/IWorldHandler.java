@@ -162,7 +162,7 @@ public class IWorldHandler extends WorldHandler {
         //*   Step five: Destroy the leftovers      *
         //*******************************************
         //TODO: add support for pass-through
-        Collection<BlockPos> deletePositions = CollectionUtils.filter(rotatedPositions.keySet(), rotatedPositions.values());
+        Collection<BlockPos> deletePositions = CollectionUtils.oldFilter(rotatedPositions.keySet(), rotatedPositions.values());
         for (BlockPos position : deletePositions) {
             setBlockFastest(nativeWorld, position, Blocks.AIR.defaultBlockState());
         }
@@ -246,7 +246,7 @@ public class IWorldHandler extends WorldHandler {
         //*   Step five: Destroy the leftovers      *
         //*******************************************
         List<BlockPos> deletePositions = positions;
-        if (oldNativeWorld == nativeWorld) deletePositions = CollectionUtils.filter(positions,newPositions);
+        if (oldNativeWorld == nativeWorld) deletePositions = CollectionUtils.oldFilter(positions,newPositions);
         for (BlockPos position : deletePositions) {
             setBlockFastest(oldNativeWorld, position, Blocks.AIR.defaultBlockState());
         }

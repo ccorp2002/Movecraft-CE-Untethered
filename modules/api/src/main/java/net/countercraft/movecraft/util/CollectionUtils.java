@@ -84,46 +84,20 @@ public class CollectionUtils {
     @NotNull
     @Contract(pure=true)
     public static <E> Collection<E> filter(@NotNull final Collection<E> collection, @NotNull final Collection<E> filter){
-        //final Collection<E> returnList = new HashSet<>();
-        /*for(E object : collection){
-            if(!filterSet.contains(object)){
-                returnList.add(object);
-            }
-        }*/
-        //final List<E> returnList = collection.stream().filter(item -> filter.contains(item)).collect(Collectors.toList());
-        final List<E> returnList = collection.stream().filter(((Predicate<E>) filter::contains).negate()).collect(Collectors.toUnmodifiableList());
-        return returnList;
+        return oldFilter(collection, filter);
     }
 
     @NotNull
     @Contract(pure=true)
     public static <E> List<E> filter(@NotNull final List<E> collection, @NotNull final Collection<E> filter){
-        //final List<E> returnList = new ArrayList<>();
-        /*for(int i = 0; i < collection.size(); i++){
-            if(!filterSet.contains(collection.get(i))){
-                returnList.add(collection.get(i));
-            }
-        }*/
-        //final List<E> returnList = collection.stream().filter(item -> filter.contains(item)).collect(Collectors.toList());
-        final List<E> returnList = collection.stream().filter(((Predicate<E>) filter::contains).negate()).collect(Collectors.toUnmodifiableList());
-        return returnList;
+        return oldFilter(collection, filter);
     }
 
     @NotNull
     @Contract(pure=true)
     @Deprecated
     public static Collection<MovecraftLocation> filter(@NotNull final HitBox collection, @NotNull final Collection<MovecraftLocation> filter){
-        //final Collection<MovecraftLocation> returnList = new HashSet<>();
-        /*for(MovecraftLocation object : collection){
-            if(!filterSet.contains(object)){
-                returnList.add(object);
-            }
-        }*/
-
-        //final Collection<MovecraftLocation> returnList = collection.asSet().stream().filter(item -> filter.contains(item)).collect(Collectors.toList());
-        final Collection<MovecraftLocation> returnList = (collection.asSet()).stream().filter(((Predicate<MovecraftLocation>) filter::contains).negate()).collect(Collectors.toUnmodifiableSet());
-        
-        return returnList;
+        return oldFilter(collection, filter);
     }
 
     @NotNull
