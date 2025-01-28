@@ -2,7 +2,7 @@
 
 ### **MUST** be using a Paper/Paper Fork (so like Purpur or something), We're ditching SpigotMC support with this one...
 
-## Requires at least *Java 21+ & Minecraft 1.20.4-1.21.3*.
+## Requires at least *Java 21+ & Minecraft: 1.20.4, 1.21.1, 1.21.3, 1.21.4*.
 
 
 
