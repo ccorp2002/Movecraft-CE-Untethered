@@ -1,4 +1,4 @@
-# **Movecraft-Community Edition : Unteathered**
+# **Movecraft-Community Edition : Untethered**
 
 ### **MUST** be using a Paper/Paper Fork (so like Purpur or something), We're ditching SpigotMC support with this one...
 
@@ -67,9 +67,9 @@ This is **another** maintained fork of Movecraft, which aims to maintain compati
 
 ## DOWNLOAD
 
-(Pre)Release Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/releases).
+(Pre)Release Builds can be found on the [releases tab](https://github.com/ccorp2002/Movecraft-CE-Untethered/releases).
 
-Development builds will eventually be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CE-Unteathered/actions?query=workflow%3A%22Java+CI%22). 
+Development builds will eventually be found under the [actions tab](https://github.com/ccorp2002/Movecraft-CE-Untethered/actions?query=workflow%3A%22Java+CI%22). 
 
 (Use at your own risk!)
 
@@ -86,12 +86,14 @@ Development builds will eventually be found under the [actions tab](https://gith
 > 
 ### How To setup the development environment:
 - Compile yourself a copy of PaperMC for each of the MC Versions this supports.
-- You will need `1.20.4, 1.21.1, 1.21.3` at the time of writing this.
+- You will need `1.20.4, 1.21.1, 1.21.3, 1.21.4` at the time of writing this.
 - This can take a while, and be confusing. Suggest checking the Readme-section for of PaperMC over here [PaperMC](https://github.com/PaperMC/Paper)
 
 
-Once you have put your compiled "server-<\version>" jars in the `libs` folder, run the following to build Movecraft through the `maven` build tool.
+Once you have put your compiled "`server-<version>.jar`" jars in the `libs` folder, run the following to build Movecraft through the `maven` build tool.
+
+An Alternative to the above method, is to run a PaperMC Server for around 15-30 seconds. Once this is done, copy the appropriate jars out of `YourServerFolder/versions/(1.21.1/1.21.3/...)`, into `libs` and rename the jars to "`server-<version>.jar`".
 ```
 mvn clean install
 ```
-Compiled jars can be found in the `/target` directory.
+A Compiled `Movecraft.jar` can be found in the `/target` directory.
