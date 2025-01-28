@@ -5,8 +5,8 @@ import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.functions.DetectionPredicate;
 import net.countercraft.movecraft.processing.functions.Result;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

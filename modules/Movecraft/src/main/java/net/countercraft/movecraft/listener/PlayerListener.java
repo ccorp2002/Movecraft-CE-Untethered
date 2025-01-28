@@ -17,40 +17,104 @@
 
 package net.countercraft.movecraft.listener;
 
-import net.countercraft.movecraft.CruiseDirection;
+import com.google.common.collect.Sets;
+import java.util.EnumSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
+import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.CruiseDirection;
 import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.*;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.SubCraft;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
+import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.PlayerCraftImpl;
+import net.countercraft.movecraft.craft.PlayerCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.events.*;
+import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
+import net.countercraft.movecraft.events.CraftPilotEvent;
+import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.CraftPreTranslateEvent;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
+import net.countercraft.movecraft.events.CraftRotateEvent;
+import net.countercraft.movecraft.events.CraftTranslateEvent;
+import net.countercraft.movecraft.events.PlayerCraftMovementEvent;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.util.Tags;
 import net.countercraft.movecraft.util.MathUtils;
-import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
+import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
+import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
+import net.countercraft.movecraft.util.hitboxes.BitMapSetHitBox;
 import net.countercraft.movecraft.util.hitboxes.SetHitBox;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import org.bukkit.event.Listener;
+import org.bukkit.Bukkit;
+import org.bukkit.block.data.type.Switch;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.WallSign;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Entity;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+//import com.jeff_media.customblockdata.*;
+//import com.jeff_media.morepersistentdatatypes.*;
 
-import java.util.*;
+import static net.countercraft.movecraft.util.ChatUtils.MOVECRAFT_COMMAND_PREFIX;
 
 
 public class PlayerListener implements Listener {
@@ -111,7 +175,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onCraftPreTranslate(CraftPreTranslateEvent e) {}
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCraftRelease(CraftReleaseEvent e) {
         if (e.isCancelled()) return;
         Craft crft = e.getCraft();
@@ -129,8 +193,9 @@ public class PlayerListener implements Listener {
               if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("remote sign")) continue;
               if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("subcraft")) continue;
               try {
-                sign.setEditable(true);
+                sign.setWaxed(false);
               } catch (Exception exc) {
+                sign.setEditable(true);
               }
               sign.update();
             }
@@ -141,58 +206,66 @@ public class PlayerListener implements Listener {
               craft.getRawTrackedMap().clear();
               craft.getCraftTags().clear();
             }
-          }.runTaskLater(Movecraft.getInstance(), 2*20);
+          }.runTaskLater(Movecraft.getInstance(), 5*20);
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCraftDetectEvent(final CraftDetectEvent e) {
-      if (e.getCraft().getOrigBlockCount() > e.getCraft().getType().getMaxSize() && !(e.isCancelled())) {
-          e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Detection - Craft too large"), e.getCraft().getType().getIntProperty(CraftType.MAX_SIZE))+" Current Size: "+e.getCraft().getOrigBlockCount());
+      final Craft craft = e.getCraft();
+      craft.setLastBlockCheck(System.currentTimeMillis());
+      if (craft.getOrigBlockCount() > craft.getType().getMaxSize() && !(e.isCancelled())) {
+          e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Detection - Craft too large"), craft.getType().getIntProperty(CraftType.MAX_SIZE))+" Current Size: "+craft.getOrigBlockCount());
+          CraftManager.getInstance().forceRemoveCraft(craft);
           e.setCancelled(true);
+          return;
       }
-      if (e.getCraft().getOrigBlockCount() < e.getCraft().getType().getMinSize() && !(e.isCancelled())) {
-          e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Detection - Craft too small"), e.getCraft().getType().getIntProperty(CraftType.MIN_SIZE))+" Current Size: "+e.getCraft().getOrigBlockCount());
+      if (craft.getOrigBlockCount() < craft.getType().getMinSize() && !(e.isCancelled())) {
+          e.setFailMessage(String.format(I18nSupport.getInternationalisedString("Detection - Craft too small"), craft.getType().getIntProperty(CraftType.MIN_SIZE))+" Current Size: "+craft.getOrigBlockCount());
+          CraftManager.getInstance().forceRemoveCraft(craft);
           e.setCancelled(true);
+          return;
       }
-      if ((e.isCancelled())) {
-        if (!(e.getCraft() instanceof PlayerCraftImpl)) return;
-        CraftManager.getInstance().forceRemoveCraft(e.getCraft());
+      CraftManager.getInstance().detectCraftHealthBlocks(craft);
+      if (CraftManager.getInstance().detect_lift_sinking(craft)) {
+        e.setFailMessage("Too few Lift/Fly Blocks! \nCraft must be composed of "+CraftManager.getInstance().get_lift_required(craft)+"% Lift/Fly Blocks");
+        CraftManager.getInstance().forceRemoveCraft(craft);
+        craft.getAudience().sendMessage(Component.text(e.getFailMessage()));
+        e.setCancelled(true);
+      }
+      if (e.isCancelled()) {
+        CraftManager.getInstance().forceRemoveCraft(craft);
         return;
       }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onCraftPilotEvent(final CraftPilotEvent e) {
-      if ((e.getCraft() instanceof SubCraft)) return;
+      if (e.getCraft() instanceof SubCraft) return;
       if (e.getReason() == CraftPilotEvent.Reason.SUB_CRAFT) return;
       e.getCraft().setLastBlockCheck(System.currentTimeMillis());
       if (e.getCraft() instanceof final BaseCraft craft) {
+        craft.setDataTag("radar_range",(Double)125d);
+        craft.setDataTag("radar_profile",(Double)360d);
+        craft.setProcessing(true);
+        CraftManager.getInstance().detectCraftHealthBlocks(craft);
+        if (craft instanceof NPCCraftImpl) return;
         final Movecraft instance = Movecraft.getInstance();
         final Player player = craft.getNotificationPlayer();
-        CraftManager.getInstance().detectCraftHealthBlocks(craft);
         if (player != null) craft.addPassenger(player);
         craft.setDataTag("idle",false);
         craft.updateLastMoveTime();
         for (ItemStack stack : CraftManager.getInstance().fuelTypeMap.keySet()) {
           CraftManager.getInstance().getAndTrackItemsOnCraft(craft,stack,null);
         }
-        if (craft.getOrigBlockCount() < 256000*2) {
+        if (craft.getOrigBlockCount() < 950000*2) {
           final int waterline = craft.getWaterLine();
           final Location midpoint = craft.getHitBox().getMidPoint().toBukkit(craft.getWorld());
           craft.setProcessing(true);
           new BukkitRunnable() {
             @Override
             public void run() {
-              HitBox interior = new SetHitBox();
-              if (craft.getOrigBlockCount() >= 128000) {
-                interior = new SetHitBox();
-              } else {
-                interior = new BitmapHitBox(craft.getTrackedMovecraftLocs("air"));
-              }
-              if (!(e.getCraft().isAutomated())) {
-                if (interior != null && interior.size() <= 0) interior = CraftManager.getInstance().detectCraftInterior(craft);
-              }
+              HitBox interior = CraftManager.getInstance().detectCraftInterior(craft);
               CruiseDirection cdir = CruiseDirection.NONE;
               craft.setCruiseDirection(cdir);
               for (Block block : craft.getBlockName("SIGN")) {
@@ -202,8 +275,7 @@ public class PlayerListener implements Listener {
                 } catch (Exception exc) {
                 }
                 if (ChatColor.stripColor(sign.getLine(0).toLowerCase()).contains("cruise:")) {
-                  if (!(sign.getBlockData() instanceof WallSign))
-                      continue;
+                  if (!(sign.getBlockData() instanceof WallSign)) continue;
                   craft.setCruiseDirection(CruiseDirection.fromBlockFace(((WallSign) sign.getBlockData()).getFacing()));
                 }
                 sign.update();
@@ -228,9 +300,9 @@ public class PlayerListener implements Listener {
           craft.updateLastMoveTime();
           Set<Entity> nearEntites = new HashSet<>();
           nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
-                  craft.getHitBox().getXLength() / 2.0 + 2.0,
-                  craft.getHitBox().getYLength() / 2.0 + 2.0,
-                  craft.getHitBox().getZLength() / 2.0 + 2.0));
+                  craft.getHitBox().getXLength() / 2.0 + 1.5,
+                  craft.getHitBox().getYLength() / 1.75 + 1.5,
+                  craft.getHitBox().getZLength() / 2.0 + 1.5));
           nearEntites.addAll(((BaseCraft)craft).getPassengers());
           craft.updateLastMoveTime();
           for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
@@ -242,6 +314,7 @@ public class PlayerListener implements Listener {
               if (entity == null) continue;
               if (!(MathUtils.locationNearHitBox(craft.getHitBox(),entity.getLocation(),2))) {
                 if (entity.getType() == EntityType.PLAYER) (craft).removePassenger(entity);
+                if (entity instanceof Display) (craft).removePassenger(entity);
                 continue;
               }
               (craft).addPassenger(entity);
@@ -251,12 +324,15 @@ public class PlayerListener implements Listener {
       }
     }
 
-  @EventHandler
-  public void onPlayerLogout(PlayerQuitEvent e) {
-      try {
-        CraftManager.getInstance().forceRemoveCraft(CraftManager.getInstance().getCraftByPlayer(e.getPlayer()));
-      } catch (Exception ex) {}
-  }
+    @EventHandler
+    public void onPlayerLogout(PlayerQuitEvent e) {
+        try {
+          CraftManager.getInstance().forceRemoveCraft(CraftManager.getInstance().getCraftByPlayer(e.getPlayer()));
+        } catch (Exception ex) {}
+    }
+
+    @EventHandler
+    public void onPlayerDeath(EntityDamageByEntityEvent e) {}
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
@@ -267,7 +343,7 @@ public class PlayerListener implements Listener {
       return;
     int dx, dy, dz;
     dx = dy = dz = 0;
-    if (MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(),5.0D)) {
+    if (MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(),2.0D)) {
       //this.timeToReleaseAfter.remove(c);
       if (!(CraftManager.getInstance().getCraftsInWorld(p.getWorld()).contains(c))) {
         return;
@@ -356,35 +432,25 @@ public class PlayerListener implements Listener {
             newloc.setYaw(p.getLocation().getYaw());
             newloc.setPitch(p.getLocation().getPitch());
             //event.setTo(newloc);
-            p.teleport(newloc);
+            p.teleport(newloc,org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.PLUGIN,io.papermc.paper.entity.TeleportFlag.Relative.values());
             craft.setLastCruiseUpdate(System.currentTimeMillis());
             c.translate(dx, 0, dz);
           }
+          return;
         }
-        return;
       }
     }
-
-    if(MathUtils.locationNearHitBox(c.getHitBox(), p.getLocation(), 7.5d)){
-        timeToReleaseAfter.remove(c);
-        return;
-    }
-
-    if(timeToReleaseAfter.containsKey(c) && timeToReleaseAfter.get(c) < System.currentTimeMillis()){
-        CraftManager.getInstance().release(c, CraftReleaseEvent.Reason.PLAYER, false);
-        timeToReleaseAfter.remove(c);
-        return;
-    }
-    if (c.isNotProcessing() && c.getType().getBoolProperty(CraftType.MOVE_ENTITIES)
-            && !timeToReleaseAfter.containsKey(c)) {
+    if (!MathUtils.locationNearHitBox((c.getHitBox()),p.getLocation(),15.0D)) {
         if (Settings.ManOverboardTimeout != 0) {
-            c.getAudience().sendActionBar(I18nSupport.getInternationalisedComponent("Manoverboard - Player has left craft"));
-            CraftManager.getInstance().addOverboard(p);
+          p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("Manoverboard - Player has left craft"));
+          CraftManager.getInstance().addOverboard(p);
+        } else {
+          p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
+          try {
+            CraftManager.getInstance().forceRemoveCraft(CraftManager.getInstance().getCraftByPlayer(event.getPlayer()));
+          } catch (Exception ex) {}
         }
-        else {
-            p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
-        }
-        timeToReleaseAfter.put(c, System.currentTimeMillis() + c.getType().getIntProperty(CraftType.RELEASE_TIMEOUT) * 1000L);
+        return;
     }
   }
 }

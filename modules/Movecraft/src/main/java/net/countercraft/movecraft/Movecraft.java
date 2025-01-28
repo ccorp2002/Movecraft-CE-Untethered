@@ -18,19 +18,50 @@
 package net.countercraft.movecraft;
 
 import net.countercraft.movecraft.async.AsyncManager;
-import net.countercraft.movecraft.commands.*;
+import net.countercraft.movecraft.commands.ContactsCommand;
+import net.countercraft.movecraft.commands.CraftInfoCommand;
+import net.countercraft.movecraft.commands.CraftReportCommand;
+import net.countercraft.movecraft.commands.CraftTypeCommand;
+import net.countercraft.movecraft.commands.CruiseCommand;
+import net.countercraft.movecraft.commands.ManOverboardCommand;
+import net.countercraft.movecraft.commands.MovecraftCommand;
+import net.countercraft.movecraft.commands.PilotCommand;
+import net.countercraft.movecraft.commands.ReleaseCommand;
+import net.countercraft.movecraft.commands.RotateCommand;
+import net.countercraft.movecraft.commands.ScuttleCommand;
+import net.countercraft.movecraft.commands.DirectControlCommand;
+import net.countercraft.movecraft.commands.CrewCommand;
 import net.countercraft.movecraft.config.Settings;
+import net.countercraft.movecraft.util.BukkitTeleport;
 import net.countercraft.movecraft.craft.ChunkManager;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.listener.InternalCraftListener;
 import net.countercraft.movecraft.listener.BlockListener;
 import net.countercraft.movecraft.listener.InteractListener;
-import net.countercraft.movecraft.listener.InternalCraftListener;
 import net.countercraft.movecraft.listener.PlayerListener;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.mapUpdater.MapUpdateManager;
 import net.countercraft.movecraft.processing.WorldManager;
-import net.countercraft.movecraft.sign.*;
-import net.countercraft.movecraft.util.BukkitTeleport;
+import net.countercraft.movecraft.sign.AscendSign;
+import net.countercraft.movecraft.sign.ContactsSign;
+import net.countercraft.movecraft.sign.CraftSign;
+import net.countercraft.movecraft.sign.CruiseSign;
+import net.countercraft.movecraft.sign.DescendSign;
+import net.countercraft.movecraft.sign.HelmSign;
+import net.countercraft.movecraft.sign.MoveSign;
+import net.countercraft.movecraft.sign.NameSign;
+import net.countercraft.movecraft.sign.PilotSign;
+import net.countercraft.movecraft.sign.RelativeMoveSign;
+import net.countercraft.movecraft.sign.ReleaseSign;
+import net.countercraft.movecraft.sign.RemoteSign;
+import net.countercraft.movecraft.sign.ScuttleSign;
+import net.countercraft.movecraft.sign.SpeedSign;
+import net.countercraft.movecraft.sign.StatusSign;
+import net.countercraft.movecraft.sign.SubcraftMoveSign;
+import net.countercraft.movecraft.sign.SubcraftRotateSign;
+//import com.github.milkdrinkers.customblockdata.*;
+import net.countercraft.movecraft.sign.TeleportSign;
+//import net.countercraft.movecraft.util.BlockHighlight;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,6 +75,7 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Movecraft extends JavaPlugin implements AbstractMovecraft {
@@ -140,12 +172,16 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         String version = packageName.substring(packageName.lastIndexOf('.') + 1);
         String mcver = Bukkit.getServer().getMinecraftVersion();
         String NMS = "";
-        if (mcver.contains(".20.5") || mcver.contains(".20.6") || mcver.endsWith(".21.1") || mcver.endsWith(".21")) {
-            NMS = "v1_21";
-        } else if (mcver.contains("1.21.2") || mcver.contains("1.21.3")) {
+
+        NMS = version;
+        if (mcver.contains(".19.4")) {
+            NMS = "v1_19_R3";
+        } if (mcver.contains(".20.4") || mcver.contains("_20_R3") || version.contains("_20_R3")) {
+            NMS = "v1_20";
+        } if (mcver.contains(".21.2") || mcver.contains(".21.3")) {
             NMS = "v1_21_3";
-        } else {
-            NMS = version;
+        } if (mcver.contains(".21.4") || mcver.contains(".21.5")) {
+            NMS = "v1_21_4";
         }
         if (!compatMode) {
             try {
@@ -198,9 +234,8 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         }
         getLogger().info(I18nSupport.getInternationalisedString("Startup - Loading Support") + " " + version);
 
-        Settings.ENABLE_CREW = getConfig().getBoolean("EnableCrew", false);
-        Settings.ENABLE_DC = getConfig().getBoolean("EnableDC", true);
-        Settings.EXTRA_COMMANDS = getConfig().getBoolean("ExtraCommands", false);
+        Settings.DIRECT_CONTROL = getConfig().getBoolean("EnableDirectControl", true);
+        Settings.CREW_COMMAND = getConfig().getBoolean("EnableCrewFeature", false);
         Settings.SinkCheckTicks = getConfig().getDouble("SinkCheckTicks", 100.0);
         Settings.ManOverboardTimeout = getConfig().getInt("ManOverboardTimeout", 30);
         Settings.ManOverboardDistSquared = Math.pow(getConfig().getDouble("ManOverboardDistance", 1000), 2);
@@ -213,7 +248,6 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         Settings.RequireNamePerm = getConfig().getBoolean("RequireNamePerm", true);
         Settings.FadeWrecksAfter = getConfig().getInt("FadeWrecksAfter", 0);
         Settings.FadeTickCooldown = getConfig().getInt("FadeTickCooldown", 20);
-        Settings.NPCUpdateTicks = getConfig().getInt("NPCUpdateTicks", 25);
         Settings.FadePercentageOfWreckPerCycle = getConfig().getDouble("FadePercentageOfWreckPerCycle", 10.0);
         if(getConfig().contains("ExtraFadeTimePerBlock")) {
             Map<String, Object> temp = getConfig().getConfigurationSection("ExtraFadeTimePerBlock").getValues(false);
@@ -275,13 +309,15 @@ public class Movecraft extends JavaPlugin implements AbstractMovecraft {
         getCommand("cruise").setExecutor(new CruiseCommand());
         getCommand("craftreport").setExecutor(new CraftReportCommand());
         getCommand("manoverboard").setExecutor(new ManOverboardCommand());
-        getCommand("dc").setExecutor(new DirectControlCommand());
-        getCommand("crew").setExecutor(new CrewCommand());
-        getCommand("contacts").setExecutor(new ContactsCommand());
+        if (Settings.DIRECT_CONTROL) {
+            getCommand("dc").setExecutor(new DirectControlCommand());
+        }
+        if (Settings.CREW_COMMAND) {
+            getCommand("crew").setExecutor(new CrewCommand());
+        }
         getCommand("scuttle").setExecutor(new ScuttleCommand());
         getCommand("crafttype").setExecutor(new CraftTypeCommand());
         getCommand("craftinfo").setExecutor(new CraftInfoCommand());
-
 
         getServer().getPluginManager().registerEvents(new InternalCraftListener(), this);
         getServer().getPluginManager().registerEvents(new BlockListener(), this);

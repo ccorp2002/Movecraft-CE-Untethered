@@ -27,6 +27,7 @@ public final class CruiseSign implements Listener {
 
     @EventHandler
     public void onCraftDetect(@NotNull CraftDetectEvent event) {
+        if (true) return; //Redundant
         World world = event.getCraft().getWorld();
         for (MovecraftLocation location : event.getCraft().getHitBox()) {
             var block = location.toBukkit(world).getBlock();
@@ -37,11 +38,10 @@ public final class CruiseSign implements Listener {
             if (!(state instanceof Sign))
                 continue;
             Sign sign = (Sign) state;
-            sign.setEditable(false);
             if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: ON")) {
                 sign.setLine(0, "Cruise: OFF");
+                sign.update();
             }
-            sign.update();
         }
     }
 
@@ -63,20 +63,19 @@ public final class CruiseSign implements Listener {
                 return;
             if (!(sign.getBlockData() instanceof WallSign))
                 return;
+            c.resetSigns();
 
             sign.setLine(0, "Cruise: ON");
             sign.update(true);
             player.sendMessage("Cruise: ON");
 
             c.setCruiseDirection(CruiseDirection.fromBlockFace(((WallSign) sign.getBlockData()).getFacing()));
-            c.setLastCruiseUpdate(System.currentTimeMillis());
+            //c.setLastCruiseUpdate(System.currentTimeMillis());
             c.setCruising(true);
-            c.resetSigns(sign);
             if (!c.getType().getBoolProperty(CraftType.MOVE_ENTITIES)) {
                 CraftManager.getInstance().addReleaseTask(c);
             }
-        }
-        else if (line.equalsIgnoreCase("Cruise: ON")) {
+        } else if (line.equalsIgnoreCase("Cruise: ON")) {
             Craft c = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
             if (c == null || !c.getType().getBoolProperty(CraftType.CAN_CRUISE))
                 return;

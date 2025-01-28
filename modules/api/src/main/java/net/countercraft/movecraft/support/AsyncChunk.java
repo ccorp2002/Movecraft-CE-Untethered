@@ -19,12 +19,16 @@ public abstract class AsyncChunk<T extends Chunk> {
         String version = packageName.substring(packageName.lastIndexOf('.') + 1);
         String mcver = Bukkit.getServer().getMinecraftVersion();
         String NMS = "";
-        if (mcver.contains(".20.5") || mcver.contains(".20.6") || mcver.endsWith(".21.1") || mcver.endsWith(".21")) {
-            NMS = "v1_21";
-        } else if (mcver.contains("1.21.2") || mcver.contains("1.21.3")) {
+
+        NMS = version;
+        if (mcver.contains(".19.4")) {
+            NMS = "v1_19_R3";
+        } if (mcver.contains(".20.4") || mcver.contains("_20_R3") || version.contains("_20_R3")) {
+            NMS = "v1_20";
+        } if (mcver.contains(".21.2") || mcver.contains(".21.3")) {
             NMS = "v1_21_3";
-        } else {
-            NMS = version;
+        } if (mcver.contains(".21.4") || mcver.contains(".21.5")) {
+            NMS = "v1_21_4";
         }
         Constructor<?> temp = null;
         try {

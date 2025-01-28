@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 
 public abstract class WorldHandler {
     public abstract boolean doesObjectContainField(Object object, String fieldName);
+    public abstract org.bukkit.block.BlockState getBukkitState(@NotNull Location location);
+    //public abstract void rotateCraftVert(@NotNull Craft craft, @NotNull MovecraftLocation originLocation, @NotNull MovecraftRotation rotation, @NotNull HitBox newHitBox, @NotNull HitBox oldHitBox);
     public abstract void rotateCraft(@NotNull Craft craft, @NotNull MovecraftLocation originLocation, @NotNull MovecraftRotation rotation);
     public abstract void translateCraft(@NotNull Craft craft, @NotNull MovecraftLocation newLocation, @NotNull World world);
     public abstract void setBlockFast(@NotNull Location location, @NotNull BlockData data);

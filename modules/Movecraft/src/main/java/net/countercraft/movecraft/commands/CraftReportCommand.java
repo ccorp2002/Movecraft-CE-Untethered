@@ -1,12 +1,13 @@
 package net.countercraft.movecraft.commands;
 
-import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.PilotedCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.util.TopicPaginator;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
+import net.countercraft.movecraft.util.TopicPaginator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

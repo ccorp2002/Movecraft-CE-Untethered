@@ -3,6 +3,8 @@ package net.countercraft.movecraft.processing.functions;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @FunctionalInterface public interface TetradicPredicateWithList<T, U, V, W, Y> {
     @Contract(pure = true) @NotNull Result validate(@NotNull T t, @NotNull U u, @NotNull V v, @NotNull W w, @Nullable Y y);

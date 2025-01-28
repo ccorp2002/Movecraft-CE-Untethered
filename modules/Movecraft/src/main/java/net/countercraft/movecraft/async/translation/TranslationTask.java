@@ -3,23 +3,46 @@ package net.countercraft.movecraft.async.translation;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.MovecraftChunk;
 import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.TrackedLocation;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.*;
+import net.countercraft.movecraft.craft.ChunkManager;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.PilotedCraft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
+import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.SinkingCraft;
+import net.countercraft.movecraft.craft.SubCraft;
+import net.countercraft.movecraft.TrackedLocation;
 import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.events.*;
+import net.countercraft.movecraft.events.CraftCollisionEvent;
+import net.countercraft.movecraft.events.CraftCollisionExplosionEvent;
+import net.countercraft.movecraft.events.CraftPreTranslateEvent;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
+import net.countercraft.movecraft.events.CraftTeleportEntityEvent;
+import net.countercraft.movecraft.events.CraftTranslateEvent;
+import net.countercraft.movecraft.events.ItemHarvestEvent;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.mapUpdater.update.*;
-import net.countercraft.movecraft.util.MathUtils;
+import net.countercraft.movecraft.mapUpdater.update.AccessLocationUpdateCommand;
+import net.countercraft.movecraft.mapUpdater.update.BlockCreateCommand;
+import net.countercraft.movecraft.mapUpdater.update.CraftTranslateCommand;
+import net.countercraft.movecraft.mapUpdater.update.EntityUpdateCommand;
+import net.countercraft.movecraft.mapUpdater.update.ExplosionUpdateCommand;
+import net.countercraft.movecraft.mapUpdater.update.ItemDropUpdateCommand;
+import net.countercraft.movecraft.mapUpdater.update.UpdateCommand;
 import net.countercraft.movecraft.util.Tags;
+import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.WorldUtils;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
 import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
-import net.countercraft.movecraft.util.hitboxes.SetHitBox;
 import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
+import net.countercraft.movecraft.util.hitboxes.SetHitBox;
 import net.kyori.adventure.key.Key;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -27,17 +50,31 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
+import java.lang.Runnable;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.countercraft.movecraft.util.MathUtils.withinWorldBorder;
 
@@ -106,13 +143,13 @@ public class TranslationTask extends AsyncTask {
             boolean ran = false;
             if (!ran) {
                 final Set<MovecraftChunk> chunksToLoad = ChunkManager.getChunks(oldHitBox, craft.getWorld());
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()
                 chunksToLoad.clear();
                 chunksToLoad.addAll(ChunkManager.getChunks(oldHitBox, world, dx, dy, dz));
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()
@@ -139,13 +176,13 @@ public class TranslationTask extends AsyncTask {
         // ensure chunks are loaded only if world is different or change in location is
         // large
         final Set<MovecraftChunk> chunksToLoad = ChunkManager.getChunks(oldHitBox, craft.getWorld());
-        MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+        MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
         ChunkManager.checkChunks(chunksToLoad);
         if (!chunksToLoad.isEmpty())
             ChunkManager.addChunksToLoad(chunksToLoad);//.get()
         chunksToLoad.clear();
         chunksToLoad.addAll(ChunkManager.getChunks(oldHitBox, world, dx, dy, dz));
-        MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+        MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
         ChunkManager.checkChunks(chunksToLoad);
         if (!chunksToLoad.isEmpty())
             ChunkManager.addChunksToLoad(chunksToLoad);//.get()
@@ -177,7 +214,7 @@ public class TranslationTask extends AsyncTask {
             if (incline > 0) {
                 boolean tooSteep = craft.getType().getIntProperty(CraftType.GRAVITY_INCLINE_DISTANCE) > -1
                         && incline > craft.getType().getIntProperty(CraftType.GRAVITY_INCLINE_DISTANCE);
-                if (tooSteep && craft.getType().getFloatProperty(CraftType.COLLISION_EXPLOSION) < 0F) {
+                if (tooSteep && craft.getType().getFloatProperty(CraftType.COLLISION_EXPLOSION) <= 0F) {
                     fail(I18nSupport.getInternationalisedString("Translation - Failed Incline too steep"));
                     return;
                 }
@@ -236,7 +273,7 @@ public class TranslationTask extends AsyncTask {
 
             Block testBlock = Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(newLocation,world);
             if (testBlock == null) testBlock = newLocation.toBukkit(world).getBlock();
-            Material testMaterial = testBlock.getType();
+            Material testMaterial = Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(newLocation,world);
             if (testMaterial == null) testMaterial = testBlock.getType();
 
             if (testMaterial.equals(Material.MOVING_PISTON)) {
@@ -248,7 +285,7 @@ public class TranslationTask extends AsyncTask {
                 //prevent chests collision
                 fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed")
                                 + " @ %d,%d,%d,%s", newLocation.getX(), newLocation.getY(), newLocation.getZ(),
-                        newLocation.toBukkit(craft.getWorld()).getBlock().getType()));
+                        testMaterial));
                 return;
             }
             if (!withinWorldBorder(world, newLocation)) {
@@ -262,7 +299,7 @@ public class TranslationTask extends AsyncTask {
             if (craft instanceof SinkingCraft)
                 blockObstructed = !Tags.FALL_THROUGH_BLOCKS.contains(testMaterial);
             else
-                blockObstructed = !testMaterial.isAir() && (!(craft.getType().getMaterialSetProperty(CraftType.PASSTHROUGH_BLOCKS).contains(testMaterial)) && !(testBlock.getBlockData().equals(CraftManager.bay_shield)));
+                blockObstructed = !testMaterial.isAir() && (!(craft.getType().getMaterialSetProperty(CraftType.PASSTHROUGH_BLOCKS).contains(testMaterial)));
 
             boolean ignoreBlock = oldLocation.toBukkit(world).getBlock().getType().isAir() && blockObstructed;
             // air never obstructs anything (changed 4/18/2017 to prevent drilling machines)
@@ -389,47 +426,6 @@ public class TranslationTask extends AsyncTask {
         if (!collisionBox.isEmpty()) {
             Bukkit.getServer().getPluginManager().callEvent(new CraftCollisionEvent(craft, collisionBox, world));
         }
-        if (craft instanceof BaseCraft) {
-            final Craft parent;
-            if (craft instanceof SubCraft) {
-                parent = ((SubCraft)craft).getParent();
-            } else {
-                parent = craft;
-            }
-            if (((craft instanceof SubCraft)) && (parent != null)) {
-                if ((parent).getRawTrackedMap().size() > 0) {
-                    for (Object key : (parent).getRawTrackedMap().keySet()) {
-                        final ArrayList<TrackedLocation> clone = new ArrayList<>();
-                        for (final TrackedLocation tracked : (parent).getRawTrackedMap().get(key)) {
-                            if (tracked != null) {
-                                final MovecraftLocation tmp = tracked.getLocation();
-                                if (parent.getHitBox().contains(tmp)) {
-                                    clone.add(((TrackedLocation) tracked).translateTracked(displacement));
-                                }
-                            }
-                        }
-                        if (!clone.isEmpty() || clone != null || clone.size() > 0) {
-                            (parent).getRawTrackedMap().put(key,clone);
-                        }
-                    }
-                }
-            } else {
-                if ((craft).getRawTrackedMap().size() > 0) {
-                    for (Object key : (craft).getRawTrackedMap().keySet()) {
-                        final ArrayList<TrackedLocation> clone = new ArrayList<>();
-                        for (final TrackedLocation tracked : (craft).getRawTrackedMap().get(key)) {
-                            if (tracked != null) {
-                                clone.add(((TrackedLocation) tracked).translateTracked(displacement));
-                            }
-                        }
-                        if (!clone.isEmpty() || clone != null || clone.size() > 0) {
-                            (craft).getRawTrackedMap().put(key,clone);
-                        }
-                    }
-                }
-            }
-        }
-        updates.add(new CraftTranslateCommand(craft, displacement, world));
         if (!(craft.getSinking() && craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS)) && craft.getType().getBoolProperty(CraftType.MOVE_ENTITIES)) {
             Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
             Set<Entity> nearEntites = new HashSet<>();
@@ -440,26 +436,26 @@ public class TranslationTask extends AsyncTask {
             nearEntites.addAll(((BaseCraft)craft).getPassengers());
             for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
                 if (c2.equals(craft)) continue;
+                if (craft instanceof NPCCraftImpl && ((NPCCraftImpl)craft).getParent() == null) continue;
                 if (c2 instanceof PilotedCraft) {
+                    ((BaseCraft)c2).removePassenger(craft.getNotificationPlayer());
                     nearEntites.removeAll(((BaseCraft)c2).getPassengers());
                     nearEntites.add(craft.getNotificationPlayer());
                 }
             }
-            if (craft instanceof PlayerCraft pcraft) {
-                (pcraft).addPassenger(pcraft.getPilot());
-                nearEntites.add(pcraft.getPilot());
-            }
+            nearEntites.addAll(((BaseCraft)craft).getPassengers());
             for (Entity entity : nearEntites) {
                 if (entity == null) continue;
                 if (entity.getVehicle() != null) continue;
-                if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.ARROW) {
-                    
-                    if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft.isAutomated())) {
+                if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.FIREWORK_ROCKET && entity.getType() != EntityType.TNT && entity.getType() != EntityType.ARROW) {
+                    if (((entity instanceof ArmorStand || entity instanceof Marker) && (craft instanceof NPCCraftImpl)) && craft.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(entity))) (craft).addPassenger(entity);
+                    if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft instanceof NPCCraftImpl)) {
+                        if ((entity instanceof Display) || (entity instanceof Interaction)) continue;
                         ((BaseCraft)craft).addPassenger(entity);
                     }
                 }
-                if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),2.5)) {
-                    if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
+                if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
+                    if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
                         continue;
                     }
                 }
@@ -493,6 +489,7 @@ public class TranslationTask extends AsyncTask {
                 // not necessary to release cruiseonpilot crafts, because they will already be released
                 CraftManager.getInstance().addReleaseTask(craft);
         }
+        updates.add(new CraftTranslateCommand(craft, displacement, world));
         captureYield(harvestedBlocks);
     }
 

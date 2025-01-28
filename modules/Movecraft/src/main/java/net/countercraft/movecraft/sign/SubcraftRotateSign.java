@@ -120,32 +120,40 @@ public final class SubcraftRotateSign implements Listener {
                         return new Pair<>(Result.failWithMessage(I18nSupport.getInternationalisedString(
                                 "Detection - Failed - Already commanding a craft")), null);
                     if (parents.size() < 1)
-                        return new Pair<>(Result.succeed(), new SubcraftRotateCraft(type, w, p));
+                        return new Pair<>(Result.succeed(), new NPCCraftImpl(type, w, null));
 
                     Craft parent = parents.iterator().next();
-                    return new Pair<>(Result.succeed(), new SubCraftImpl(type, w, parent));
+                    NPCCraftImpl craft = new NPCCraftImpl(type, w, null);
+                    craft.setPassengers(parent.getPassengers());
+                    craft.setParent(parent);
+                    return new Pair<>(Result.succeed(), craft);
                 },
-                world, player, player,
+                world, null, Movecraft.getAdventure().console(),
                 craft -> () -> {
                     Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.SUB_CRAFT));
-                    if (craft instanceof SubCraft) { // Subtract craft from the parent
-                        Craft parent = ((SubCraft) craft).getParent();
-                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());;
-                        parent.setHitBox(newHitbox);
+                    if (craft instanceof NPCCraftImpl) { // Subtract craft from the parent
+                        Craft parent = ((NPCCraftImpl) craft).getParent();
+                        if (parent != null) {
+                            var newHitbox = parent.getHitBox().difference(craft.getHitBox());
+                            parent.setHitBox(newHitbox);
+                        }
                     }
+                    Movecraft.getInstance().getAsyncManager().submitTask(new RotationTask(craft, startPoint, rotation, craft.getWorld(), true), craft);
+                    //craft.rotate(rotation, startPoint, true);
 
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            craft.rotate(rotation, startPoint, true);
-                            if (craft instanceof SubCraft) {
-                                Craft parent = ((SubCraft) craft).getParent();
-                                var newHitbox = parent.getHitBox().union(craft.getHitBox());
-                                parent.setHitBox(newHitbox);
+                            if (craft instanceof NPCCraftImpl) {
+                                Craft parent = ((NPCCraftImpl) craft).getParent();
+                                if (parent != null) {
+                                    var newHitbox = parent.getHitBox().union(craft.getHitBox());
+                                    parent.setHitBox(newHitbox);
+                                }
                             }
                             CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUB_CRAFT, false);
                         }
-                    }.runTaskLater(Movecraft.getInstance(), 3);
+                    }.runTaskLater(Movecraft.getInstance(), 2);
                 }
         );
         event.setCancelled(true);
@@ -155,6 +163,6 @@ public final class SubcraftRotateSign implements Listener {
                 rotating.remove(startPoint);
                 if (playerCraft != null) playerCraft.setProcessing(false);
             }
-        }.runTaskLater(Movecraft.getInstance(), 4);
+        }.runTaskLater(Movecraft.getInstance(), 3);
     }
 }

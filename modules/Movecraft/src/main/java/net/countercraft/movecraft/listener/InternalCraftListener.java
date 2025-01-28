@@ -2,13 +2,20 @@ package net.countercraft.movecraft.listener;
 
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.SubCraft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
+import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.CraftPilotEvent;
 import net.countercraft.movecraft.events.CraftReleaseEvent;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+
+import org.bukkit.event.world.AsyncStructureGenerateEvent;
+import org.bukkit.util.*;
 
 public class InternalCraftListener implements Listener {
 
@@ -16,7 +23,8 @@ public class InternalCraftListener implements Listener {
     public void onCraftDetect(@NotNull CraftDetectEvent event) {
         // Walk through all signs and set a UUID in there
         final Craft craft = event.getCraft();
-        if (craft.isAutomated()) return;
+        if (craft instanceof NPCCraftImpl) return;
+        if (craft instanceof SubCraft) return;
         // Now, find all signs on the craft...
         for (MovecraftLocation mLoc : craft.getHitBox()) {
             Block block = mLoc.toBukkit(craft.getWorld()).getBlock();
@@ -38,7 +46,7 @@ public class InternalCraftListener implements Listener {
         // Walk through all signs and set a UUID in there
         final Craft craft = event.getCraft();
         if (craft == null) return;
-        if (craft.isAutomated()) return;
+        if (craft instanceof NPCCraftImpl) return;
         if (event.isCancelled()) return;
 
         // Now, find all signs on the craft...

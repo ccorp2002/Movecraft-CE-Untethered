@@ -1,4 +1,6 @@
 /Movecraft.jar
+/target/*
+/libs/server-1.21.4.jar
 /libs/server-1.21.3.jar
 /libs/server-1.21.1.jar
 /libs/server-1.20.4.jar

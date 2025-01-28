@@ -1,14 +1,21 @@
 package net.countercraft.movecraft.commands;
 
-import net.countercraft.movecraft.config.Settings;
+import net.countercraft.movecraft.MovecraftRotation;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static net.countercraft.movecraft.util.ChatUtils.MOVECRAFT_COMMAND_PREFIX;
 
@@ -18,7 +25,7 @@ public class CrewCommand implements CommandExecutor{
         if(!command.getName().equalsIgnoreCase("crew")){
             return false;
         }
-        if (!Settings.ENABLE_CREW) return true;
+        if (!Settings.CREW_COMMAND) return false;
         if(!(commandSender instanceof Player)){
             commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + "Must Be a Player to use the Crew Command");
             return true;

@@ -1,8 +1,8 @@
 name: Movecraft
 version: Unteathered-1.0.0
-api-version: 1.19
+api-version: 1.20
 description: The original flight and movement plugin for minecraft.
-author: "C_Corp2002, based on: BaccaYarro, cccm5, TylerS1066, eirik1996, drfiveminusmint and HumorousFool's Work"
+author: "C_Corp2002, based on: cccm5, BaccaYarro, TylerS1066, eirik1996, drfiveminusmint and HumorousFool's Work"
 website: https://github.com/APDevTeam/Movecraft
 main: net.countercraft.movecraft.Movecraft
 
@@ -47,6 +47,3 @@ commands:
   craftinfo:
     description: Get information on a piloted craft
     usage: /crafttype [player] [page]
-libraries: []
-#  - org.roaringbitmap:RoaringBitmap:1.0.6
-#  - it.unimi.dsi:fastutil:8.5.13

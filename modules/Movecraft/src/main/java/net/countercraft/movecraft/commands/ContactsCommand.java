@@ -6,8 +6,8 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.PilotedCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.util.TopicPaginator;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
+import net.countercraft.movecraft.util.TopicPaginator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,10 +25,6 @@ public class ContactsCommand implements CommandExecutor {
         }
         if(!(commandSender instanceof Player)){
             commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + I18nSupport.getInternationalisedString("Contacts - Must Be Player"));
-            return true;
-        }
-        if (!commandSender.hasPermission("movecraft.commands.contacts")) {
-            commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + I18nSupport.getInternationalisedString("Insufficient Permissions"));
             return true;
         }
         Player player = (Player) commandSender;

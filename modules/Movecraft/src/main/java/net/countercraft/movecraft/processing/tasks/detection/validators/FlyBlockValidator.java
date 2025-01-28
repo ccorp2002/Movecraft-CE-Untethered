@@ -3,6 +3,7 @@ package net.countercraft.movecraft.processing.tasks.detection.validators;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
+import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.functions.DetectionPredicate;
 import net.countercraft.movecraft.processing.functions.Result;
@@ -33,14 +34,27 @@ public class FlyBlockValidator implements DetectionPredicate<Map<Material, Deque
             if(result.getLeft() == RequiredBlockEntry.DetectionResult.SUCCESS)
                 continue;
 
+
             String failMessage = "";
             switch (result.getLeft()) {
                 case NOT_ENOUGH:
-                    failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    if (entry.materialsToString().toLowerCase().contains("note block")) {
+                        failMessage += ": [" + "beacon, reactor_block" + "] " + result.getRight();
+                    } else if (entry.materialsToString().toLowerCase().contains("wool")) {
+                        failMessage += ": [" + "wool, wool carpet" + "] " + result.getRight();
+                    } else {
+                        failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    }
                     failMessage += " (Too Few LIFT-HP Blocks!)";
                     break;
                 case TOO_MUCH:
-                    failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    if (entry.materialsToString().toLowerCase().contains("note block")) {
+                        failMessage += ": [" + "beacon, reactor block" + "] " + result.getRight();
+                    } else if (entry.materialsToString().toLowerCase().contains("wool")) {
+                        failMessage += ": [" + "wool, wool carpet" + "] " + result.getRight();
+                    } else {
+                        failMessage += ": [" + entry.materialsToString() + "] " + result.getRight();
+                    }
                     failMessage += " (Too Many LIFT-HP Blocks!)";
                     break;
                 default:

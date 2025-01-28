@@ -103,100 +103,6 @@ public class ChunkManager implements Listener {
         }).runTaskLaterAsynchronously(PLUGIN, 60*10L);
     }
 
-    public static void asyncLoadChunk(Chunk chunk) {
-          MovecraftChunk nchunk = new MovecraftChunk(chunk.getX(),chunk.getZ(),chunk.getWorld());
-            if (!chunk.isLoaded()) {
-                if (!chunks.add(nchunk)) return;
-                try {
-                    CompletableFuture<Chunk> cf = chunk.getWorld().getChunkAtAsync(chunk.getX(), chunk.getZ(),true);
-                    cf.thenAccept(chunke -> { });
-                    //Movecraft.getInstance().getWorldHandler().getChunkFastest(nchunk.getBukkitLocation());
-                    //CompletableFuture<Chunk> cf =chunk.getWorld().getChunkAtAsyncUrgently(chunk.getX(), chunk.getZ());
-                    //cf.thenAccept(chunke -> { });
-                    //chunk.getWorld().getChunkAt(chunk.getX(), chunk.getZ(), false, false);
-                } catch(Exception e) {
-                    CompletableFuture<Chunk> cf = chunk.getWorld().getChunkAtAsync(chunk.getX(), chunk.getZ(),true);
-                    cf.thenAccept(chunke -> { });
-                }
-            }
-
-        // remove chunks after 10 seconds
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                ChunkManager.removeChunkToLoad(nchunk);
-            }
-
-        }.runTaskLaterAsynchronously(PLUGIN, 32*10L);
-    }
-
-    public static void asyncLoadChunk(Location loc) {
-        int chunkX = loc.getBlockX() / 16;
-        if (loc.getBlockX() < 0) chunkX--;
-        int chunkZ = loc.getBlockZ() / 16;
-        if (loc.getBlockZ() < 0) chunkZ--;
-          MovecraftChunk nchunk = new MovecraftChunk(chunkX,chunkZ,loc.getWorld());
-          if (chunks.add(nchunk)) {
-            if (!nchunk.isLoaded()) {
-                try {
-                    CompletableFuture<Chunk> cf = nchunk.getWorld().getChunkAtAsync(nchunk.getX(), nchunk.getZ(),true);
-                    cf.thenAccept(chunke -> { });
-                    //Movecraft.getInstance().getWorldHandler().getChunkFastest(loc);
-                    //CompletableFuture<Chunk> cf =loc.getWorld().getChunkAtAsyncUrgently(chunkX, chunkZ);
-                    //cf.thenAccept(chunke -> { });
-                    //chunk.getWorld().getChunkAt(chunk.getX(), chunk.getZ(), false, false);
-                } catch(Exception e) {
-                    CompletableFuture<Chunk> cf = nchunk.getWorld().getChunkAtAsync(nchunk.getX(), nchunk.getZ(),true);
-                    cf.thenAccept(chunke -> { });
-
-                }
-            }
-          }
-
-        // remove chunks after 10 seconds
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                ChunkManager.removeChunkToLoad(nchunk);
-            }
-
-        }.runTaskLaterAsynchronously(PLUGIN, 32*10L);
-    }
-
-    public static void asyncLoadChunk(MovecraftLocation loc, World world) {
-        int chunkX = loc.getX() / 16;
-        if (loc.getX() < 0) chunkX--;
-        int chunkZ = loc.getZ() / 16;
-        if (loc.getZ() < 0) chunkZ--;
-          MovecraftChunk nchunk = new MovecraftChunk(chunkX,chunkZ,world);
-          if (chunks.add(nchunk)) {
-              if (!nchunk.isLoaded()) {
-                  try {
-                    //Movecraft.getInstance().getWorldHandler().getChunkFastest(loc.toBukkit(world));
-                    //CompletableFuture<Chunk> cf = world.getChunkAtAsyncUrgently(chunkX, chunkZ);
-                    //cf.thenAccept(chunke -> { });
-                    //chunk.getWorld().getChunkAt(chunk.getX(), chunk.getZ(), false, false);
-                  } catch(Exception e) {
-                    CompletableFuture<Chunk> cf = nchunk.getWorld().getChunkAtAsync(nchunk.getX(), nchunk.getZ(),true);
-                    cf.thenAccept(chunke -> { });
-
-                  }
-              }
-          }
-
-        // remove chunks after 10 seconds
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                ChunkManager.removeChunkToLoad(nchunk);
-            }
-
-        }.runTaskLaterAsynchronously(PLUGIN, 32*10L);
-    }
-
     public static void removeChunksToLoad(Iterable<MovecraftChunk> list) {
         for (MovecraftChunk chunk : list) {
             chunk.toBukkit().setForceLoaded(false);
@@ -214,7 +120,6 @@ public class ChunkManager implements Listener {
       if (true) return;
       final MovecraftChunk nchunk = new MovecraftChunk(event.getChunk());
       if (chunks.contains(nchunk)) {
-        //asyncLoadChunk(event.getChunk());
         return;
       }
       new BukkitRunnable() {

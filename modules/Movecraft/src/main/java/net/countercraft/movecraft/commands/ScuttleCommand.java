@@ -1,6 +1,7 @@
 package net.countercraft.movecraft.commands;
 
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.events.CraftScuttleEvent;
@@ -62,8 +63,10 @@ public class ScuttleCommand implements CommandExecutor {
         craft.setSinking(true);
         CraftManager.getInstance().removePlayerFromCraft(craft);
         commandSender.sendMessage(MOVECRAFT_COMMAND_PREFIX + I18nSupport.getInternationalisedString("Scuttle - Scuttle Activated"));
-        CraftSinkEvent evnt = new CraftSinkEvent(craft);
-        Bukkit.getServer().getPluginManager().callEvent(evnt);
+        
+        Craft sunk = CraftManager.getInstance().sink(craft);
+        CraftManager.getInstance().forceRemoveCraft(craft);
+        CraftManager.getInstance().addCraft(sunk);
         return true;
     }
 }

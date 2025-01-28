@@ -1,22 +1,12 @@
 Locale: en
-PilotTool: STICK
-
-# Enables:
-# WASD Direct Control w/Keyboard Turning (Sneak-walking sideways in Direct Control)
-# The "/dc" Command
-
-lockPilotAtDirectControl: true
-EnableDC: true
-
-# Enables:
-# Passengers/Crews (Allows the Pilot to add/remove Players who can 'stick' to their Ship)
-# The "/crew <username>" Command, allows the above.
-EnableCrew: true
-
+PilotTool: COMPASS
+EnableDirectControl: true
+EnableCrewFeature: false
+CompatibilityMode: false
 DisableSpillProtection: false
 DisableIceForm: true
 SinkCheckTicks: 100
-ManOverboardTimeout: 60
+ManOverboardTimeout: 30
 ManOverboardDistance: 1000 # maximum distance from a craft that you can manoverboard to it
 SilhouetteViewDistance: 200
 SilhouetteBlockCount: 20
@@ -38,17 +28,6 @@ CollisionPrimer: 1000
 ForbiddenRemoteSigns: # These strings will be ignored when searching for signs to trigger from a remote sign
   - "Mounted"
   - "Denied"
-  - "Remote Sign"
   - "[private]"
+CompatibilityMode: false
 GeneratedDatapack: false # Set to false to re-generate datapack on startup
-
-GearshiftsWithPilotToolEnabled: true #Allows Players to Change speeds via Sneak-Right Clicking with the Stick/Control-Item
-
-
-# >>> EXPERIMENTAL ADDITION <<<
-#The Following ONLY works if you are using the Paper Fork of:
-#- https://github.com/SparklyPower/SparklyPaper
-# Enables:
-# Multiworld-Threading (TLDR; Large Crafts will move without extensively lagging the main thread of the server.)
-IsMultithreaded: false
-# >>> EXPERIMENTAL ADDITION <<<

@@ -13,6 +13,31 @@ import java.util.Set;
 
 public class ISmoothTeleport extends SmoothTeleport {
 
+    public void teleport(@NotNull Player player, @NotNull Location location) {
+        player.teleport(
+                location,
+                TeleportFlag.Relative.X,
+                TeleportFlag.Relative.Y,
+                TeleportFlag.Relative.Z,
+                TeleportFlag.Relative.PITCH,
+                TeleportFlag.Relative.YAW,
+                TeleportFlag.EntityState.RETAIN_OPEN_INVENTORY,
+                TeleportFlag.EntityState.RETAIN_VEHICLE,
+                TeleportFlag.EntityState.RETAIN_PASSENGERS);
+    }
+    public void teleport(@NotNull Player player, @NotNull Location location, float yawChange, float pitchChange) {
+        player.teleport(
+                location,
+                TeleportFlag.Relative.X,
+                TeleportFlag.Relative.Y,
+                TeleportFlag.Relative.Z,
+                TeleportFlag.Relative.PITCH,
+                TeleportFlag.Relative.YAW,
+                TeleportFlag.EntityState.RETAIN_OPEN_INVENTORY,
+                TeleportFlag.EntityState.RETAIN_VEHICLE,
+                TeleportFlag.EntityState.RETAIN_PASSENGERS);
+    }
+
     public void teleport(@NotNull Entity entity, @NotNull Location location) {
         entity.teleport(
                 location,

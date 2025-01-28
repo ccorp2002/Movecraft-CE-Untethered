@@ -1,10 +1,12 @@
 package net.countercraft.movecraft.processing.tasks.detection;
 
 import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.WorldHandler;
+import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.SubCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
@@ -17,10 +19,21 @@ import net.countercraft.movecraft.processing.effects.Effect;
 import net.countercraft.movecraft.processing.functions.CraftSupplier;
 import net.countercraft.movecraft.processing.functions.DetectionPredicate;
 import net.countercraft.movecraft.processing.functions.Result;
-import net.countercraft.movecraft.processing.tasks.detection.validators.*;
+import net.countercraft.movecraft.processing.tasks.detection.validators.AllowedIgnoreBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.AllowedBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.DetectionBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.FlyBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.ForbiddenBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.ForbiddenSignStringValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.NameSignValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.PilotSignValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.SizeValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.InteriorBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.WaterContactValidator;
 import net.countercraft.movecraft.util.AtomicLocationSet;
 import net.countercraft.movecraft.util.CollectionUtils;
 import net.countercraft.movecraft.util.Tags;
+import net.countercraft.movecraft.util.hitboxes.BitMapSetHitBox;
 import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
@@ -29,14 +42,37 @@ import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -67,8 +103,8 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
             new PilotSignValidator()
     );
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of(
-            new SizeValidator(),
-            new FlyBlockValidator()
+            new FlyBlockValidator(),
+            new SizeValidator()
     );
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> VISITED_VALIDATORS = List.of(
             new WaterContactValidator()
@@ -115,6 +151,8 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
     private Effect detectInterior(Craft craft) {
         craft.setDataTag("origin_size",craft.getOrigBlockCount());
         craft.setDataTag("current_size",craft.getOrigBlockCount());
+        if (craft instanceof NPCCraftImpl) return () -> {};
+        if (craft.getOrigBlockCount() >= 125000) return () -> {};
         if (!craft.getType().getBoolProperty(CraftType.DETECT_INTERIOR)) return () -> {};
         final WorldHandler handler = Movecraft.getInstance().getWorldHandler();
         final World badWorld = WorldManager.INSTANCE.executeMain(craft::getWorld);
@@ -190,17 +228,22 @@ public class IgnoreDetectionTask implements Supplier<Effect> {
                 }
             }
         }
-        craft.setTrackedMovecraftLocs("air",interiorSet);
-        ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
-        if (waterLine != -64 && waterLine != -128) return () -> {};
-        var waterData = Movecraft.getInstance().getWaterBlockData();
-        return () -> {
-            for (MovecraftLocation location : craft.getHitBox()) {
-                if (location.getY() <= waterLine) {
-                    craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+        if (craft.getHitBox().size()+(int)(craft.getHitBox().size()/1.25) >= interiorSet.size()) {
+            //interior.addAll(interiorSet);
+            craft.setTrackedMovecraftLocs("air",interiorSet);
+            ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
+            //craft.setHitBox(craft.getHitBox().union(interior));
+            if (waterLine != -64 && waterLine != -128) return () -> {};
+            var waterData = Movecraft.getInstance().getWaterBlockData();
+            return () -> {
+                for (MovecraftLocation location : craft.getHitBox()) {
+                    if (location.getY() <= waterLine) {
+                        craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+                    }
                 }
-            }
-        };
+            };
+        }
+        return () -> {};
     }
 
     @NotNull

@@ -232,6 +232,17 @@ public class MathUtils {
         if (bukkitLocation == null) return null;
         return new MovecraftLocation(bukkitLocation.getBlockX(), bukkitLocation.getBlockY(), bukkitLocation.getBlockZ());
     }
+    /**
+     * Creates a <code>MovecraftLocation</code> representation of a bukkit <code>Location</code> object aligned to the block grid
+     * @param bukkitLocation the location to convert
+     * @return a new <code>MovecraftLocation</code> representing the given location
+     */
+    @Nullable
+    @Contract(pure=true)
+    public static MovecraftLocation bukkit2MovecraftLoc(@NotNull final Block block) {
+        if (block == null) return null;
+        return bukkit2MovecraftLoc(block.getLocation());
+    }
     @Nullable
     @Contract(pure=true)
     public static MovecraftLocation bukkit2MovecraftLoc(@NotNull final Vector vector) {
@@ -242,7 +253,7 @@ public class MathUtils {
     @Contract(pure=true)
     public static MovecraftLocation bukkit2MovecraftLoc(@NotNull final Entity entity) {
         if (entity == null) return null;
-        return new MovecraftLocation(entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ());
+        return bukkit2MovecraftLoc(entity.getLocation());
     }
     @Nullable
     @Contract(pure=true)
@@ -290,7 +301,6 @@ public class MathUtils {
      * The resulting MovecraftRotation is based on an axis.
      * @param rotation the direction to rotate
      * @param movecraftLocation the location to rotate
-     * @param movecraftLocation the axis to rotate around.
      * @return a rotated Movecraft location
      */
     @NotNull

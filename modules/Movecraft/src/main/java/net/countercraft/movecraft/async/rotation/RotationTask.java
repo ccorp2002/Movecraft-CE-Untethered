@@ -17,12 +17,25 @@
 
 package net.countercraft.movecraft.async.rotation;
 
-import net.countercraft.movecraft.*;
+import net.countercraft.movecraft.CruiseDirection;
+import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.TrackedLocation;
+import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.MovecraftRotation;
+import net.countercraft.movecraft.MovecraftChunk;
+import net.countercraft.movecraft.craft.ChunkManager;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.*;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.SubCraft;
+import net.countercraft.movecraft.craft.PilotedCraft;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
+import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.SinkingCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.events.CraftRotateEvent;
+import net.countercraft.movecraft.events.CraftTeleportEntityEvent;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.mapUpdater.update.AccessLocationUpdateCommand;
 import net.countercraft.movecraft.mapUpdater.update.CraftRotateCommand;
@@ -32,6 +45,7 @@ import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.Tags;
 import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
 import net.countercraft.movecraft.util.hitboxes.SetHitBox;
+import net.countercraft.movecraft.util.hitboxes.HitBox;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -39,14 +53,25 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryView;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
+import java.lang.Runnable;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.countercraft.movecraft.util.MathUtils.withinWorldBorder;
 
@@ -137,7 +162,7 @@ public class RotationTask extends AsyncTask {
                 }
                 Block newBlock = Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(newLocation,w);
                 if (newBlock == null) newBlock = newLocation.toBukkit(w).getBlock();
-                Material newMaterial = newBlock.getType();
+                Material newMaterial = Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(newLocation,w);
                 if (newMaterial == null) newMaterial = newBlock.getType();
 
                 if (newMaterial.isAir() || (newMaterial == Material.PISTON_HEAD) || craft.getType().getMaterialSetProperty(CraftType.PASSTHROUGH_BLOCKS).contains(newMaterial))
@@ -164,13 +189,13 @@ public class RotationTask extends AsyncTask {
             }
             if (!ran) {
                 final Set<MovecraftChunk> chunksToLoad = ChunkManager.getChunks(oldHitBox, craft.getWorld());
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()
                 chunksToLoad.clear();
                 chunksToLoad.addAll(ChunkManager.getChunks(newHitBox, craft.getWorld(), 0, 0, 0));
-                MovecraftChunk.addSurroundingChunks(chunksToLoad, 1);
+                MovecraftChunk.addSurroundingChunks(chunksToLoad, 2);
                 ChunkManager.checkChunks(chunksToLoad);
                 if (!chunksToLoad.isEmpty())
                     ChunkManager.addChunksToLoad(chunksToLoad);//.get()
@@ -192,49 +217,10 @@ public class RotationTask extends AsyncTask {
             //rotate entities in the craft
 
             updates.add(new CraftRotateCommand(craft, originPoint, rotation));
-
-            final Craft parent;
-            if (parentCraft != craft) {
-                parent = parentCraft;
-            } else {
-                parent = craft;
-            }
-
-            if ((craft instanceof SubCraft) && (parent != craft)) {
-                if (((BaseCraft)parent).getRawTrackedMap().size() > 0) {
-                    for (Object key : ((BaseCraft)parent).getRawTrackedMap().keySet()) {
-                        final ArrayList<TrackedLocation> clone = new ArrayList<>();
-                        for (TrackedLocation tracked : ((BaseCraft)parent).getRawTrackedMap().get(key)) {
-                            if (tracked != null) {
-                                if (parent.getHitBox().contains(tracked.getLocation())) {
-                                    clone.add(((TrackedLocation) tracked).rotateTracked(originPoint,rotation));
-                                }
-                            }
-                        }
-                        if (!clone.isEmpty() || clone != null || clone.size() > 0) {
-                            ((BaseCraft)parent).getRawTrackedMap().put(key,clone);
-                        }
-                    }
-                }
-            } else {
-                if (((BaseCraft)craft).getRawTrackedMap().size() > 0) {
-                    for (Object key : ((BaseCraft)craft).getRawTrackedMap().keySet()) {
-                        final ArrayList<TrackedLocation> clone = new ArrayList<>();
-                        for (TrackedLocation tracked : ((BaseCraft)craft).getRawTrackedMap().get(key)) {
-                            if (tracked != null) {
-                                clone.add(((TrackedLocation) tracked).rotateTracked(originPoint,rotation));
-                            }
-                        }
-                        if (!clone.isEmpty() || clone != null || clone.size() > 0) {
-                            ((BaseCraft)craft).getRawTrackedMap().put(key,clone);
-                        }
-                    }
-                }
-            }
             final Location tOP = originPoint.toBukkit(getCraft().getWorld());
             tOP.setX(tOP.getBlockX() + 0.5);
             tOP.setZ(tOP.getBlockZ() + 0.5);
-            if (craft.getType().getBoolProperty(CraftType.MOVE_ENTITIES) && !(craft.getSinking() && craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS)) && !(craft.isAutomated())) {
+            if (craft.getType().getBoolProperty(CraftType.MOVE_ENTITIES) && !(craft.getSinking() && craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS)) && !(craft instanceof NPCCraftImpl)) {
                 Location midpoint = oldHitBox.getMidPoint().toBukkit(craft.getWorld());
                 Set<Entity> nearEntites = new HashSet<>();
                 nearEntites.addAll(craft.getWorld().getNearbyEntities(midpoint,
@@ -244,25 +230,26 @@ public class RotationTask extends AsyncTask {
                 nearEntites.addAll(((BaseCraft)craft).getPassengers());
                 for (Craft c2 : CraftManager.getInstance().getCraftsInWorld(craft.getWorld())) {
                     if (c2.equals(craft)) continue;
+                    if (craft instanceof NPCCraftImpl && ((NPCCraftImpl)craft).getParent() == null) continue;
                     if (c2 instanceof PilotedCraft) {
+                        ((BaseCraft)c2).removePassenger(craft.getNotificationPlayer());
                         nearEntites.removeAll(((BaseCraft)c2).getPassengers());
                         nearEntites.add(craft.getNotificationPlayer());
                     }
                 }
-            if (craft instanceof PlayerCraft pcraft) {
-                (pcraft).addPassenger(pcraft.getPilot());
-                nearEntites.add(pcraft.getPilot());
-            }
+                nearEntites.addAll(((BaseCraft)craft).getPassengers());
             for (Entity entity : nearEntites) {
                     if (entity == null) continue;
                     if (entity.getVehicle() != null) continue;
-                    if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.ARROW) {
-                        if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft.isAutomated())) {
+                    if (entity.getType() != EntityType.PLAYER && entity.getType() != EntityType.FIREWORK_ROCKET && entity.getType() != EntityType.TNT && entity.getType() != EntityType.ARROW) {
+                        if (((entity instanceof ArmorStand || entity instanceof Marker) && (craft instanceof NPCCraftImpl)) && craft.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(entity))) (craft).addPassenger(entity);
+                        if (!(((BaseCraft)craft).hasPassenger(entity)) && !(craft instanceof NPCCraftImpl)) {
+                            if ((entity instanceof Display) || (entity instanceof Interaction)) continue;
                             ((BaseCraft)craft).addPassenger(entity);
                         }
                     }
-                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),2.5)) {
-                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
+                    if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
                             continue;
                         }
                     }
@@ -284,10 +271,10 @@ public class RotationTask extends AsyncTask {
                         }
                     }
                     if (entity.getVehicle() != null) continue;
-                    if (((entity.getType() == EntityType.PLAYER || entity.getType() == EntityType.PRIMED_TNT) && !craft.getSinking()) || !craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || ((BaseCraft)craft).getPassengers().contains(entity)) {
+                    if (((entity.getType() == EntityType.PLAYER || entity.getType() == EntityType.TNT) && !craft.getSinking()) || !craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || ((BaseCraft)craft).getPassengers().contains(entity)) {
                         // Player is onboard this craft
-                        if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),1.5)) {
-                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),1.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox,entity.getLocation(),3.5)) {
+                        if (!MathUtils.locationNearHitBox(oldHitBox.boundingHitBox(),entity.getLocation(),3.5)) {
                             //Movecraft.getInstance().getLogger().warning("Skipping Entity: "+entity+", Not Aboard");
                             continue;
                         }

@@ -376,7 +376,7 @@ final public class CraftType {
     }
 
     public Set<Material> getMoveBlocks() {
-        Set<Material> mats = new HashSet<>();
+        final Set<Material> mats = new HashSet<>();
         for (RequiredBlockEntry entry : getRequiredBlockProperty(this.MOVE_BLOCKS)) {
             mats.addAll(entry.getMaterials());
         }
@@ -384,7 +384,7 @@ final public class CraftType {
     }
 
     public Set<Material> getFlyBlocks() {
-        Set<Material> mats = new HashSet<>();
+        final Set<Material> mats = new HashSet<>();
         for (RequiredBlockEntry entry : getRequiredBlockProperty(this.FLY_BLOCKS)) {
             mats.addAll(entry.getMaterials());
         }
@@ -479,7 +479,7 @@ final public class CraftType {
         registerProperty(new BooleanProperty("focusedExplosion", FOCUSED_EXPLOSION, type -> false));
         registerProperty(new BooleanProperty("mustBeSubcraft", MUST_BE_SUBCRAFT, type -> false));
         registerProperty(new IntegerProperty("staticWaterLevel", STATIC_WATER_LEVEL, type -> -128));
-        registerProperty(new DoubleProperty("fuelBurnRate", FUEL_BURN_RATE, type -> 0D));
+        registerProperty(new DoubleProperty("fuelBurnRate", FUEL_BURN_RATE, type -> 5D));
         registerProperty(new PerWorldProperty<>("perWorldFuelBurnRate", PER_WORLD_FUEL_BURN_RATE,
                 (type, worldName) -> type.getDoubleProperty(FUEL_BURN_RATE)));
         registerProperty(new DoubleProperty("disablePercent", DISABLE_PERCENT, type -> 0.85D));
@@ -493,7 +493,7 @@ final public class CraftType {
         registerProperty(new PerWorldProperty<>("perWorldUnderWaterDetectionMultiplier",
                 PER_WORLD_UNDERWATER_DETECTION_MULTIPLIER,
                 (type, worldName) -> type.getDoubleProperty(UNDERWATER_DETECTION_MULTIPLIER)));
-        registerProperty(new DoubleProperty("sinkSpeed", SINK_SPEED, type -> 5D));
+        registerProperty(new DoubleProperty("sinkSpeed", SINK_SPEED, type -> 1D));
         registerProperty(new IntegerProperty("sinkRateTicks", SINK_RATE_TICKS,
                 type -> (int) Math.max(120,Math.ceil(20 / type.getDoubleProperty(SINK_SPEED)))));
         registerProperty(new BooleanProperty("keepMovingOnSink", KEEP_MOVING_ON_SINK, type -> false));

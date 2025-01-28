@@ -152,6 +152,8 @@ public interface Craft {
 
     void teleport(Location bl);
 
+    void teleport(@Nullable World world, int x, int y, int z);
+
     @NotNull
     Collection<TrackedLocation> getTrackedLocations(@NotNull Object key);
 
@@ -161,6 +163,8 @@ public interface Craft {
     void setTrackedBlocks(@NotNull Collection<Block> blocks, Object key);
 
     Collection<Block> getBlockData(@NotNull BlockData blk);
+
+    Collection<Block> getBlockDataNoCache(@NotNull BlockData blk);
 
     void setTrackedMovecraftLocs(@NotNull Object key, Collection<MovecraftLocation> tracked);
 
@@ -369,6 +373,8 @@ public interface Craft {
     Collection<Block> getBlockName(String s);
 
     Collection<Block> getBlockType(Material mat);
+
+    Collection<Block> getBlockTypeNoCache(Material mat);
 
     @NotNull
     MutableHitBox getFluidLocations();

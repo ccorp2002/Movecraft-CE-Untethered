@@ -53,12 +53,15 @@ import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.util.Waitable;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import io.papermc.paper.util.MCUtil;
 import org.bukkit.Bukkit;
 
 import java.lang.reflect.Field;
@@ -70,6 +73,7 @@ import java.util.Map;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.Future;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -117,14 +121,39 @@ public class IWorldHandler extends WorldHandler {
     @Override
     public boolean runTaskInWorld(@NotNull Runnable runMe, org.bukkit.World world) {
         final ServerLevel nativeWorld = ((CraftWorld) world).getHandle();
-        boolean ran = false;
+        final boolean[] ran = new boolean[]{false};
         if (doesObjectContainField(nativeWorld,"tickExecutor") && Settings.IS_MULTITHREADED) {
-            Settings.IS_MULTITHREADED = false;
+            //MCUtil.ensureMain(null,() -> {
+                try {
+                    nativeWorld.updateLagCompensationTick();
+                    //MCS.serverLevelTickingSemaphore.acquire();
+                    //MCS.tasks.add(
+                    CompletableFuture.runAsync(runMe,nativeWorld.tickExecutor);
+                    //nativeWorld.tickExecutor.submit(runMe,nativeWorld).get();
+                    ran[0] = true;
+                        /*() -> {
+                            try {
+                                runMe.run();
+                                // These are from the "tickServer" function
+                                // SparklyPaper end
+                                ran[0] = true;
+                            } catch (Throwable thr) {
+                                thr.printStackTrace();
+                                ran[0] = false;
+                            } finally {
+                                MCS.serverLevelTickingSemaphore.release();
+                            }
+                        }*///, nativeWorld).get();
+                    //);
+                } catch (Exception exc) {
+                    exc.printStackTrace();
+                    ran[0] = false;
+                }
 
-        } else {
-            Settings.IS_MULTITHREADED = false;
+            //});
         }
-        return ran;
+        return ran[0];
+        //return true;
     }
 
     @Override
@@ -213,6 +242,8 @@ public class IWorldHandler extends WorldHandler {
         Bukkit.getPluginManager().callEvent(event);
         
         if (craft.getNotificationPlayer() == null) return;
+        if (craft.getOrigBlockCount()>=950000) return;
+        if (craft.getOrigBlockCount()>=25600) return;
         processLight(craft.getHitBox(),craft.getWorld());
         processRedstone(redstoneComps.keySet(), nativeWorld);
     }
@@ -375,6 +406,8 @@ public class IWorldHandler extends WorldHandler {
         final CraftFinishMoveEvent event = new CraftFinishMoveEvent(craft);
         Bukkit.getPluginManager().callEvent(event);
         if (craft.getNotificationPlayer() == null) return;
+        if (craft.getOrigBlockCount()>=950000) return;
+        if (craft.getOrigBlockCount()>=25600) return;
         processLight(craft.getHitBox(),craft.getWorld());
         processRedstone(redstoneComps, nativeWorld);
     }
@@ -398,7 +431,13 @@ public class IWorldHandler extends WorldHandler {
             setBlockFastest(world, position, oldState);
             return world.getBlockEntity(position);
         }
-        return world.getChunkAt(position).blockEntities.remove(position);
+        try {
+            world.getChunkAt(position).removeBlockEntity(position);
+            return testEntity;
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        return null;
     }
 
     @NotNull
@@ -431,7 +470,7 @@ public class IWorldHandler extends WorldHandler {
             return;
         }
         section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
-        world.sendBlockUpdated(position, data, data, 1);
+        world.sendBlockUpdated(position, data, data, Block.UPDATE_CLIENTS);
         //world.getLightEngine().checkBlock(position); // boolean corresponds to if chunk section empty
         chunk.markUnsaved();
     }
@@ -451,16 +490,16 @@ public class IWorldHandler extends WorldHandler {
             return;
         }
 
-        if (chunk.getBlockEntity(position) != null || data.equals(Blocks.AIR.defaultBlockState())) {
+        if (chunk.getBlockEntity(position) != null) {
+            chunk.removeBlockEntity(position);
 
-            final BlockEntity tile = removeBlockEntity(world, position);
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
-            ((ServerLevel)world).sendBlockUpdated(position, data, data, 1);
-            //((ServerLevel)world).getChunkSource().blockChanged(position);
+            //((ServerLevel)world).getChunkSource()(position, data, data, Block.UPDATE_CLIENTS);
+            ((ServerLevel)world).getChunkSource().blockChanged(position);
         } else {
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
-            //((ServerLevel)world).getChunkSource().blockChanged(position);
-            ((ServerLevel)world).sendBlockUpdated(position, data, data, 1);
+            ((ServerLevel)world).getChunkSource().blockChanged(position);
+            //((ServerLevel)world).getChunkSource()(position, data, data, Block.UPDATE_CLIENTS);
         }
         chunk.markUnsaved();
         //setBlockFast(world, position, data);
@@ -491,14 +530,13 @@ public class IWorldHandler extends WorldHandler {
 
         if (chunk.getBlockEntity(position) != null || data.equals(Blocks.AIR.defaultBlockState())) {
 
-            final BlockEntity tile = removeBlockEntity(world, position);
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
-            ((ServerLevel)world).sendBlockUpdated(position, data, data, 1);
-            //((ServerLevel)world).getChunkSource().blockChanged(position);
+            //((ServerLevel)world).getChunkSource()(position, data, data, Block.UPDATE_CLIENTS);
+            ((ServerLevel)world).getChunkSource().blockChanged(position);
         } else {
             section.setBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15, data);
-            //((ServerLevel)world).getChunkSource().blockChanged(position);
-            ((ServerLevel)world).sendBlockUpdated(position, data, data, 1);
+            ((ServerLevel)world).getChunkSource().blockChanged(position);
+            //((ServerLevel)world).getChunkSource()(position, data, data, Block.UPDATE_CLIENTS);
         }
         chunk.markUnsaved();
         //setBlockFast(world, position, data);
@@ -535,6 +573,13 @@ public class IWorldHandler extends WorldHandler {
         LevelChunkSection section = chunk.getSections()[chunkSection];
         BlockState data = section.getBlockState(position.getX() & 15, position.getY() & 15, position.getZ() & 15);
         return data;
+    }
+
+    @Nullable
+    public org.bukkit.block.BlockState getBukkitState(@NotNull Location location) {
+        org.bukkit.block.Block data = getBukkitBlockFast(location);
+        if (data == null) return null;
+        return data.getState();
     }
 
     @Nullable
@@ -590,7 +635,7 @@ public class IWorldHandler extends WorldHandler {
     public void processRedstone(Collection<BlockPos> redstone, Level world) {
         for (final BlockPos pos : redstone) {
             BlockState data = getBlockFastest(world,pos);
-            world.sendBlockUpdated(pos, data, data, 3);
+            world.sendBlockUpdated(pos, data, data, Block.UPDATE_CLIENTS);
             if (isToggleableRedstoneComponent(data.getBlock())) {
                 data.tick((ServerLevel)world,pos,RANDOM);
             }

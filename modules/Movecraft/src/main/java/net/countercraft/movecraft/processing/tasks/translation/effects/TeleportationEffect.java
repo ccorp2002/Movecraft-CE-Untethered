@@ -1,17 +1,20 @@
 package net.countercraft.movecraft.processing.tasks.translation.effects;
 
 import net.countercraft.movecraft.MovecraftLocation;
-import net.countercraft.movecraft.craft.BaseCraft;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.SinkingCraft;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.type.CraftType;
+import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.mapUpdater.update.EntityUpdateCommand;
 import net.countercraft.movecraft.processing.effects.Effect;
-import net.countercraft.movecraft.util.MathUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import net.countercraft.movecraft.util.MathUtils;
 
 public class TeleportationEffect implements Effect {
     private final @NotNull Craft craft;
@@ -48,7 +51,7 @@ public class TeleportationEffect implements Effect {
                 }
                 EntityUpdateCommand eUp = new EntityUpdateCommand(entity, translation.getX(), translation.getY(), translation.getZ(), 0, 0, world);
                 eUp.doUpdate();
-            } else if (!craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || entity.getType() == EntityType.PRIMED_TNT) {
+            } else if (!craft.getType().getBoolProperty(CraftType.ONLY_MOVE_PLAYERS) || entity.getType() == EntityType.TNT) {
                 EntityUpdateCommand eUp = new EntityUpdateCommand(entity, translation.getX(), translation.getY(), translation.getZ(), 0, 0, world);
                 eUp.doUpdate();
             }

@@ -17,15 +17,20 @@
 
 package net.countercraft.movecraft.listener;
 
+import com.google.common.collect.*;
+
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.*;
 import net.countercraft.movecraft.events.CraftBlockChangeEvent;
+import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.Tags;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
@@ -33,16 +38,52 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.material.Attachable;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import org.jetbrains.annotations.NotNull;
 
 public class BlockListener implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
     public void onBlockChange(@NotNull CraftBlockChangeEvent e) {
         if (e.isCancelled()) {
             if (!e.getState().getType().isSolid()) {
@@ -60,7 +101,7 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockBreak(@NotNull BlockBreakEvent e) {
         if (!Settings.ProtectPilotedCrafts)
             return;
@@ -83,7 +124,7 @@ public class BlockListener implements Listener {
             }
         }
     }
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockPlace(@NotNull BlockPlaceEvent e) {
         if (!Settings.ProtectPilotedCrafts)
             return;
@@ -104,27 +145,87 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
-    public void onBlockExplode(@NotNull BlockExplodeEvent e) {
-        if (e.isCancelled()) {
-            return;
+
+    public static boolean willDoBlockDamage(final Block block, int armorBonus, int hullBonus) {
+        final java.util.Random rand = CraftManager.getInstance().rand();
+        int survChance = (int)CraftManager.getInstance().getArmorChance(block);
+        int roll = rand.nextInt(100)+1;
+        if ((block.getType().getBlastResistance()) >= 75) return false;
+        if (CraftManager.getInstance().isArmorBlock(block)) {
+            survChance += armorBonus;
+        } else {
+            survChance += 25;
+            survChance += hullBonus;
         }
-        for (Block block : e.blockList()) {
-            Craft craft = CraftManager.getInstance().getCraftFromBlock(block);
+        return (roll > survChance);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(@NotNull BlockExplodeEvent e) {
+        final ArrayList<Block> blocks = Lists.newArrayList(e.blockList());
+        Craft craft = null;
+        for (Block block : blocks) {
+            craft = CraftManager.getInstance().getCraftFromBlock(block);
             if (craft == null) continue;
-            tryRemoveBlock(block,craft);
+            if (craft instanceof SinkingCraft) continue;
+            craft.removeBlock(block);
+            craft.updateLastMoveTime();
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityExplode(@NotNull EntityExplodeEvent e) {
-        if (e.isCancelled()) {
-            return;
-        }
-        for (Block block : e.blockList()) {
-            Craft craft = CraftManager.getInstance().getCraftFromBlock(block);
+        final ArrayList<Block> blocks = Lists.newArrayList(e.blockList());
+        Craft craft = null;
+        for (Block block : blocks) {
+            craft = CraftManager.getInstance().getCraftFromBlock(block);
             if (craft == null) continue;
-            tryRemoveBlock(block,craft);
+            if (craft instanceof SinkingCraft) continue;
+
+            craft.removeBlock(block);
+            craft.updateLastMoveTime();
+        }
+    }
+
+    public static void tryRemoveBlock(final MovecraftLocation movecraftLocation, final Craft craft) {
+        final Block block = movecraftLocation.toBukkit(craft.getWorld()).getBlock();
+        if (CraftManager.getInstance().checkArmorBlock(block)) return;
+        final Material type = block.getType();
+        craft.updateLastMoveTime();
+        if (craft.getHitBox().boundingHitBox().contains(movecraftLocation)) {
+            Location location = movecraftLocation.toBukkit(block.getWorld());
+            BlockData phaseBlock = craft.getPhaseBlocks().getOrDefault(location, null);
+            if (phaseBlock == null) phaseBlock = Movecraft.getInstance().AirBlockData;
+            if (location.getBlock().getType() != type) {
+                Movecraft.getInstance().getWorldHandler().setBlockFast(location, phaseBlock);
+                craft.removeBlock(location.getBlock());
+            }
+            if (Tags.FLUID.contains(location.getBlock().getType())) {
+                Movecraft.getInstance().getWorldHandler().setBlockFast(location, phaseBlock);
+                craft.removeBlock(location.getBlock());
+            }
+
+        }
+    }
+
+    public static void tryRemoveBlock(final Block block, final Craft craft) {
+        final MovecraftLocation movecraftLocation = MathUtils.bukkit2MovecraftLoc(block.getLocation());
+        if (CraftManager.getInstance().checkArmorBlock(block)) return;
+        final Material type = block.getType();
+        craft.updateLastMoveTime();
+        if (craft.getHitBox().boundingHitBox().contains(movecraftLocation)) {
+            Location location = movecraftLocation.toBukkit(block.getWorld());
+            BlockData phaseBlock = craft.getPhaseBlocks().getOrDefault(location, null);
+            if (phaseBlock == null) phaseBlock = Movecraft.getInstance().AirBlockData;
+            if (location.getBlock().getType() != type) {
+                Movecraft.getInstance().getWorldHandler().setBlockFast(location, phaseBlock);
+                craft.removeBlock(location.getBlock());
+            }
+            if (Tags.FLUID.contains(location.getBlock().getType())) {
+                Movecraft.getInstance().getWorldHandler().setBlockFast(location, phaseBlock);
+                craft.removeBlock(location.getBlock());
+            }
+
         }
     }
 
@@ -157,22 +258,6 @@ public class BlockListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
-        }
-    }
-    public static void tryRemoveBlock(final MovecraftLocation movecraftLocation, final Craft craft) {
-        final Block block = movecraftLocation.toBukkit(craft.getWorld()).getBlock();
-        craft.updateLastMoveTime();
-        craft.removeBlock(block);
-        if (Tags.FRAGILE_MATERIALS.contains(block.getType())) {
-            block.setType(Material.AIR,true);
-        }
-    }
-
-    public static void tryRemoveBlock(final Block block, final Craft craft) {
-        craft.updateLastMoveTime();
-        craft.removeBlock(block);
-        if (Tags.FRAGILE_MATERIALS.contains(block.getType())) {
-            block.setType(Material.AIR,true);
         }
     }
 

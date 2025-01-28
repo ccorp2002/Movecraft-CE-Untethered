@@ -23,6 +23,7 @@ public class AscendSign implements Listener {
 
     @EventHandler
     public void onCraftDetect(CraftDetectEvent event){
+        if (true) return; //Redundant
         World world = event.getCraft().getWorld();
         for(MovecraftLocation location: event.getCraft().getHitBox()){
             var block = location.toBukkit(world).getBlock();
@@ -60,14 +61,14 @@ public class AscendSign implements Listener {
             if (!c.getType().getBoolProperty(CraftType.CAN_CRUISE)) {
                 return;
             }
+            c.resetSigns();
             //c.resetSigns(true, false, true);
             sign.setLine(0, "Ascend: ON");
             sign.update(true);
 
             c.setCruiseDirection(CruiseDirection.UP);
-            c.setLastCruiseUpdate(System.currentTimeMillis());
+            //c.setLastCruiseUpdate(System.currentTimeMillis());
             c.setCruising(true);
-            c.resetSigns(sign);
 
             if (!c.getType().getBoolProperty(CraftType.MOVE_ENTITIES)) {
                 CraftManager.getInstance().addReleaseTask(c);

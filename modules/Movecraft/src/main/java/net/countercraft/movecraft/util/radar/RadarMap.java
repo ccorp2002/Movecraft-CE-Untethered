@@ -1,12 +1,18 @@
 package net.countercraft.movecraft.util.radar;
 
-import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.util.pathfinding.RunPathfinder;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.Movecraft;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.lang.Math;
 
 
 public class RadarMap {
@@ -32,7 +38,7 @@ public class RadarMap {
 
 
   public static Set<Craft> getRadarContacts(Craft craft) {
-    double range = 250;
+    double range = 0;
     Set<Craft> crafts = new HashSet<>();
     if (craft.getDataTag("radar_range") != null) {
       range = (double)craft.getDataTag("radar_range");
@@ -42,7 +48,7 @@ public class RadarMap {
       if (oth.getDataTag("radar_profile") != null) {
         radar = (double)oth.getDataTag("radar_profile");
       }
-      range += radar;
+      radar += range;
       double dist = (double)craft.getMidPoint().distance(oth.getMidPoint());
       if (dist > range) continue;
       crafts.add(oth);

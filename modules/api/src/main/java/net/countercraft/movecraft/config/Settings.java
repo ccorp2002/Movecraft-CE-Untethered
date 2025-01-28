@@ -27,9 +27,8 @@ import java.util.Map;
 
 public class Settings {
     public static boolean IS_MULTITHREADED = false;
-    public static boolean ENABLE_CREW = false;
-    public static boolean ENABLE_DC = true;
-    public static boolean EXTRA_COMMANDS = false;
+    public static boolean DIRECT_CONTROL = false;
+    public static boolean CREW_COMMAND = false;
     public static boolean IGNORE_RESET = false;
     public static boolean Debug = false;
     public static int THREAD_POOL_SIZE = 3;
@@ -41,7 +40,6 @@ public class Settings {
     public static boolean CompatibilityMode = false;
     public static boolean DelayColorChanges = false;
     public static double SinkRateTicks = 100.0;
-    public static int NPCUpdateTicks = 20;
     public static double SinkCheckTicks = 100.0;
     public static boolean ProtectPilotedCrafts = false;
     public static boolean DisableSpillProtection = false;

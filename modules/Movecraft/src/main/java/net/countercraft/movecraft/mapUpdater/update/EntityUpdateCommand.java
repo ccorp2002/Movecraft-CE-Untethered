@@ -17,13 +17,23 @@
 
 package net.countercraft.movecraft.mapUpdater.update;
 
-import net.countercraft.movecraft.MovecraftRotation;
-import net.countercraft.movecraft.util.TeleportUtils;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.util.TeleportUtils;
+import net.countercraft.movecraft.MovecraftRotation;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.PlayerCraft;
+import net.countercraft.movecraft.craft.CraftManager;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.block.BlockFace;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Hanging;
 import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
 
 import java.util.Objects;
 
@@ -113,6 +123,9 @@ public class EntityUpdateCommand extends UpdateCommand {
 
     @Override
     public void doUpdate() {
+        final Runnable runMe = new Runnable() {
+            @Override
+            public void run() {
         final Location entityLoc = entity.getLocation();
         Location destLoc = new Location(world, entityLoc.getX() + x, entityLoc.getY() + y, entityLoc.getZ() + z, yaw + entityLoc.getYaw(), pitch + entityLoc.getPitch());
         
@@ -127,7 +140,9 @@ public class EntityUpdateCommand extends UpdateCommand {
                 ((Player) entity).playSound(destLoc, sound, volume, 1.0f);
             }
         }
-        TeleportUtils.teleport(entity, destLoc, yaw, pitch);
+        TeleportUtils.teleport(entity, destLoc, yaw);
+        }};
+        Bukkit.getScheduler().runTask(Movecraft.getInstance(), runMe);
     }
 
     @Override

@@ -39,9 +39,11 @@ public class PlayerCraftImpl extends BaseCraft implements PlayerCraft {
         this.pilotLockedX = 0.0;
         this.pilotLockedY = 0.0;
         this.pilotLockedZ = 0.0;
-        this.setPassengers(original.getPassengers());
-        this.getRawTrackedMap().putAll(original.getRawTrackedMap());
-        this.getCraftTags().putAll(original.getCraftTags());
+        if (original instanceof BaseCraft) {
+            this.setPassengers(((BaseCraft)original).getPassengers());
+            this.trackedLocations.putAll(((BaseCraft)original).trackedLocations);
+            this.craftTags.putAll(((BaseCraft)original).craftTags);
+        }
     }
     @Override
     public boolean equals(Object obj) {
@@ -51,10 +53,10 @@ public class PlayerCraftImpl extends BaseCraft implements PlayerCraft {
         return super.equals(obj);
     }
 
+    @NotNull
     public void setPilot(Player pilot) {
         this.pilot = pilot;
     }
-
     @Override
     public @NotNull Player getPilot() {
         return pilot;

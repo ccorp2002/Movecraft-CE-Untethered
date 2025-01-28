@@ -19,46 +19,165 @@
 
 package net.countercraft.movecraft.craft;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import org.bukkit.util.Vector;
+import org.bukkit.Axis;
+import org.bukkit.block.Banner;
+import org.bukkit.block.Beacon;
+import org.bukkit.block.Beehive;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Campfire;
+import org.bukkit.block.CommandBlock;
+import org.bukkit.block.Container;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.EndGateway;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Jukebox;
+import org.bukkit.block.Lectern;
+import org.bukkit.block.Lockable;
+import org.bukkit.block.Sign;
+import org.bukkit.block.Skull;
+import org.bukkit.block.Structure;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.MultipleFacing;
+import org.bukkit.block.data.Orientable;
+import org.bukkit.block.data.Rail;
+import org.bukkit.block.data.Rotatable;
+import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.type.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.MovecraftRotation;
-import net.countercraft.movecraft.WorldHandler;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.type.CraftType;
-import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
-import net.countercraft.movecraft.events.*;
+import net.countercraft.movecraft.events.CraftPreTranslateEvent;
+import net.countercraft.movecraft.events.CraftPilotEvent;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
+import net.countercraft.movecraft.events.CraftPreSinkEvent;
+import net.countercraft.movecraft.events.FuelBurnEvent;
+import net.countercraft.movecraft.events.CraftSinkEvent;
+import net.countercraft.movecraft.events.TypesReloadedEvent;
 import net.countercraft.movecraft.exception.NonCancellableReleaseException;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.CachedMovecraftWorld;
 import net.countercraft.movecraft.processing.WorldManager;
 import net.countercraft.movecraft.processing.effects.Effect;
 import net.countercraft.movecraft.processing.functions.CraftSupplier;
 import net.countercraft.movecraft.processing.functions.Result;
+import net.countercraft.movecraft.craft.type.property.RequiredBlockProperty;
+import net.countercraft.movecraft.craft.type.RequiredBlockEntry;
 import net.countercraft.movecraft.processing.tasks.detection.DetectionTask;
 import net.countercraft.movecraft.processing.tasks.detection.HitBoxDetectionTask;
-import net.countercraft.movecraft.processing.tasks.detection.IgnoreDetectionTask;
 import net.countercraft.movecraft.processing.tasks.detection.UnsafeDetectionTask;
-import net.countercraft.movecraft.util.CollectionUtils;
-import net.countercraft.movecraft.util.MathUtils;
+import net.countercraft.movecraft.processing.tasks.detection.IgnoreDetectionTask;
+import net.countercraft.movecraft.processing.tasks.detection.WorldDetectionTask;
+import net.countercraft.movecraft.async.rotation.RotationTask;
 import net.countercraft.movecraft.util.Pair;
 import net.countercraft.movecraft.util.Tags;
-import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
-import net.countercraft.movecraft.util.hitboxes.HitBox;
-import net.countercraft.movecraft.util.hitboxes.SetHitBox;
-import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
+import net.countercraft.movecraft.util.MathUtils;
+import net.countercraft.movecraft.util.CollectionUtils;
+import net.countercraft.movecraft.util.hitboxes.*;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.Material;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.util.Vector;
+import org.bukkit.Axis;
+import org.bukkit.block.Banner;
+import org.bukkit.block.Beacon;
+import org.bukkit.block.Beehive;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Campfire;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Container;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.EndGateway;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Jukebox;
+import org.bukkit.block.Lectern;
+import org.bukkit.block.Lockable;
+import org.bukkit.block.Sign;
+import org.bukkit.block.Skull;
+import org.bukkit.block.Structure;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.MultipleFacing;
+import org.bukkit.block.data.Orientable;
+import org.bukkit.block.data.Rail;
+import org.bukkit.block.data.Rotatable;
+import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.type.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.entity.Entity;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -69,19 +188,115 @@ import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
+import net.countercraft.movecraft.processing.MovecraftWorld;
+import net.countercraft.movecraft.WorldHandler;
+import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.config.Settings;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.BaseCraft;
+import net.countercraft.movecraft.craft.PlayerCraft;
+import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.type.CraftType;
+import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.CraftReleaseEvent;
+import net.countercraft.movecraft.events.CraftMergeEvent;
+import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.util.MathUtils;
+import net.countercraft.movecraft.events.PlayerCraftMovementEvent;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.util.Vector;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.Bukkit;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.ArrayDeque;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.io.File;
-import java.util.*;
+import java.util.Queue;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ListIterator;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
+
+
+import static net.countercraft.movecraft.util.ItemUtils.reduceItemStack;
+import static net.countercraft.movecraft.util.ItemUtils.isSimilar;
+import static net.countercraft.movecraft.util.ItemUtils.updateItemDurability;
 
 import static net.countercraft.movecraft.util.ChatUtils.ERROR_PREFIX;
-import static net.countercraft.movecraft.util.ItemUtils.*;
 
 public class CraftManager implements Iterable<Craft>{
-    private final String REMOTE_SIGN_HEADER = "Remote Sign";
+    private final String HEADER = "Remote Sign";
     private static CraftManager ourInstance;
     @NotNull public final Set<Craft> crafts = new ConcurrentSkipListSet<>(Comparator.comparingInt(Craft::hashCode));
     @NotNull public final ConcurrentMap<Player, PlayerCraft> craftPlayerIndex = new ConcurrentHashMap<>();
@@ -97,7 +312,6 @@ public class CraftManager implements Iterable<Craft>{
     /**
     * Map of players to their current craft.
     */
-    public static final BlockData bay_shield = Bukkit.createBlockData("minecraft:note_block[instrument=bit,note=0,powered=false]");
     private final java.util.Random rand = new java.util.Random();
     @NotNull public final ConcurrentMap<Player, PlayerCraft> playerCrafts = new ConcurrentHashMap<>();
     @NotNull private final ConcurrentMap<Craft, BukkitTask> releaseEvents = new ConcurrentHashMap<>();
@@ -120,7 +334,7 @@ public class CraftManager implements Iterable<Craft>{
         this.addFuelType(new ItemStack(Material.CHARCOAL),75.0);
         this.addFuelType(new ItemStack(Material.COAL_BLOCK),125.0);
         this.addFuelType(new ItemStack(Material.DRIED_KELP_BLOCK),125.0);
-        //this.addFuelType(new ItemStack(Material.BLAZE_ROD),250.0);
+        this.addFuelType(new ItemStack(Material.BLAZE_ROD),250.0);
         this.addFuelType(new ItemStack(Material.LAVA_BUCKET),750.0);
         if(loadCraftTypes) {
             this.craftTypes = loadCraftTypes();
@@ -151,49 +365,6 @@ public class CraftManager implements Iterable<Craft>{
     public void addArmorType(@NotNull BlockData bd, @NotNull Double chance) {
         armorBlocks.put(bd,chance);
     }
-    public static World getWorldOffMain(Craft craft) {
-        World badWorld = null;
-        if (!Bukkit.isPrimaryThread()) {
-            try {
-                badWorld = craft.getMovecraftWorld().getWorld();
-            } catch (Exception exc) {
-                badWorld = craft.getWorld();
-            }
-        } else {
-            badWorld = craft.getWorld();
-        }
-        if (badWorld == null) badWorld = craft.getWorld();
-        return badWorld;
-    }
-
-    public static Set<Craft> getCraftListInRange(Craft craft, int dist) {
-        if (dist <= 0) dist = 1000;
-        final Set<Craft> output = new HashSet<>();
-        if (craft == null) return output;
-        final MovecraftLocation point = craft.getMidPoint();
-        for (final Craft oth : CraftManager.getInstance().getCrafts()) {
-        if (oth.equals(craft)) continue;
-        if (!getWorldOffMain(craft).equals(getWorldOffMain(oth))) continue;
-        final HitBox temp = oth.getHitBox();
-        if (!MathUtils.locationNearHitBox(temp,point,dist)) continue;
-        output.add(oth);
-        }
-        output.remove(craft);
-        return output;
-    }
-    public static Set<Craft> getCraftListInRange(MovecraftLocation point, World world, int dist) {
-        if (dist <= 0) dist = 1000;
-        final Set<Craft> output = new HashSet<>();
-        if (point == null) return output;
-        if (world == null) return output;
-        for (final Craft oth : CraftManager.getInstance().getCrafts()) {
-        final HitBox temp = oth.getHitBox();
-        if (!world.equals(getWorldOffMain(oth))) continue;
-        if (!MathUtils.locationNearHitBox(temp,point,dist)) continue;
-        output.add(oth);
-        }
-        return output;
-    }
 
     public static CraftManager getInstance() {
         return ourInstance;
@@ -208,26 +379,49 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public void detectCraftHealthBlocks(Craft craft) {
-        Set<Block> origin_lift = Sets.newHashSet();
-        Set<Block> origin_engine = Sets.newHashSet();
+        craft.setLastBlockCheck(System.currentTimeMillis());
+        HashSet<Block> origin_lift = Sets.newHashSet();
         for (RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.FLY_BLOCKS)) {
-            for (Material mat : entry.getMaterials()) {
+            for(Material mat : entry.getMaterials()) {
                 origin_lift.addAll(((craft).getBlockType(mat)));
             }
         }
-        craft.setDataTag("radar_range",(Double)125d);
-        craft.setDataTag("radar_profile",(Double)360d);
+        craft.setTrackedBlocks(origin_lift,"lift_locs");
         craft.setDataTag("origin_lift",(Integer)(origin_lift.size()));
         craft.setDataTag("current_lift", (Integer)(origin_lift.size()));
-        craft.setTrackedBlocks(origin_lift,"lift_locs");
+        HashSet<Block> origin_engine = Sets.newHashSet();
         for(RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.MOVE_BLOCKS)) {
             for (Material mat : entry.getMaterials()) {
                 origin_engine.addAll(((craft).getBlockType(mat)));
             }
         }
+        craft.setLastBlockCheck(System.currentTimeMillis());
         craft.setDataTag("origin_engine", (Integer)(origin_engine.size()));
         craft.setDataTag("current_engine", (Integer)(origin_engine.size()));
         craft.setTrackedBlocks(origin_engine,"engine_locs");
+        if (craft.getDataTag("origin_size") == null) craft.setDataTag("origin_size",(Integer)craft.getOrigBlockCount());
+        if (craft.getDataTag("current_size") == null) craft.setDataTag("current_size",(Integer)craft.getOrigBlockCount());
+    }
+
+    public void updateCraftHealthBlocks(Craft craft) {
+        HashSet<Block> origin_lift = Sets.newHashSet();
+        for (RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.FLY_BLOCKS)) {
+            for(Material mat : entry.getMaterials()) {
+                origin_lift.addAll(((craft).getBlockTypeNoCache(mat)));
+            }
+        }
+        craft.setTrackedBlocks(origin_lift,"lift_locs");
+        craft.setDataTag("current_lift", (Integer)(origin_lift.size()));
+        HashSet<Block> origin_engine = Sets.newHashSet();
+        for(RequiredBlockEntry entry : craft.getType().getRequiredBlockProperty(CraftType.MOVE_BLOCKS)) {
+            for (Material mat : entry.getMaterials()) {
+                origin_engine.addAll(((craft).getBlockTypeNoCache(mat)));
+            }
+        }
+        craft.setLastBlockCheck(System.currentTimeMillis());
+        craft.setDataTag("current_engine", (Integer)(origin_engine.size()));
+        craft.setTrackedBlocks(origin_engine,"engine_locs");
+        if (craft.getDataTag("current_size") == null) craft.setDataTag("current_size",(Integer)craft.getOrigBlockCount());
     }
 
     public HitBox translateBox(HitBox box, MovecraftLocation v) {
@@ -246,12 +440,26 @@ public class CraftManager implements Iterable<Craft>{
         }
         return newBox;
     }
+    public void teleportCraft(Craft c, Location bl) {
+       int dx, dy, dz = 0;
+       World dw = c.getWorld();
+       if (bl.getWorld() == null) {
+          dw = c.getWorld();
+       } else {
+          dw = bl.getWorld();
+       }
+       Location center = c.getHitBox().getMidPoint().toBukkit(c.getWorld());
+       dx = bl.getBlockX() - center.getBlockX();
+       dy = bl.getBlockY() - center.getBlockY();
+       dz = bl.getBlockZ() - center.getBlockZ();
+       c.translate(dw,dx,dy,dz);
+    }
 
     @NotNull
     public void addFuelType(ItemStack stack, double chance) {
         fuelTypes.add(stack);
-        fuelTypeChance.add((Double) chance);
-        fuelTypeMap.put(stack,(Double) chance);
+        fuelTypeChance.add(chance);
+        fuelTypeMap.put(stack,chance);
     }
     @NotNull
     public Set<CraftType> getCraftTypes() {
@@ -267,17 +475,18 @@ public class CraftManager implements Iterable<Craft>{
             return craft;
         }
         ((BaseCraft)craft).setSinking(true);
+        forceRemoveCraft(craft);
         Craft sunk = new SinkingCraftImpl(craft);
         CraftSinkEvent sinkevent = new CraftSinkEvent(sunk);
         Bukkit.getServer().getPluginManager().callEvent(sinkevent);
         try {
-            sunk.setPassengers(craft.getPassengers());
-            sunk.getRawTrackedMap().putAll(craft.getRawTrackedMap());
-            sunk.getCraftTags().putAll(craft.getCraftTags());
+            ((BaseCraft)sunk).craftTags = ((BaseCraft)craft).craftTags;
+            ((BaseCraft)sunk).trackedLocations = ((BaseCraft)craft).trackedLocations;
         } catch(Exception exception) {}
         if (sinkevent.isCancelled()) {
             sunk = craft;
         }
+        forceRemoveCraft(craft);
         CraftDetectEvent detect = new CraftDetectEvent(sunk, sunk.getHitBox().getMidPoint());
         Bukkit.getServer().getPluginManager().callEvent(detect);
         if (!detect.isCancelled()) addCraft(sunk);
@@ -307,7 +516,7 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public boolean forceBurnFuel(Craft craft) {
-        return forceBurnFuel(craft,0,0,true);
+        return forceBurnFuel(craft,1,1,true);
     }
 
     public boolean forceBurnFuel(Craft craft, int addAmount, double addChance) {
@@ -315,16 +524,15 @@ public class CraftManager implements Iterable<Craft>{
     }
 
     public boolean forceBurnFuel(Craft craft, int addAmount, double addChance, boolean forceRun) {
-        if (addAmount <= 1) addAmount = 0;
-        if (addChance <= 1.0d) addChance = 0.0d;
+        if (addAmount <= 0) addAmount = 1;
+        if (addChance <= 0.0d) addChance = 1.0d;
         if (craft.getBurningFuel() > 1) addAmount+=craft.getBurningFuel();
         boolean found = false;
         if (craft.getSinking() || craft instanceof SinkingCraft) return true;
 
         if (craft.getNotificationPlayer() == null) return true;
 
-        if (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) <= 1.0) return true;
-        addAmount += (int)craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE);
+        if (craft.getType().getDoubleProperty(CraftType.FUEL_BURN_RATE) <= 0.0) return true;
         ItemStack wasteItem = this.wasteItem;
         if (craft instanceof PlayerCraftImpl) {
             if (forceRun) addChance = 100d;
@@ -337,17 +545,17 @@ public class CraftManager implements Iterable<Craft>{
                 wasteItem = event.getWasteItem();
                 fuelBurnChance = event.getFuelBurnChance();
                 istack = event.getBurningFuel();
-                found = this.forceCheckFuel(craft,addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
+                found = this.forceCheckFuel(craft,1+((int)(craft.getCurrentGear()/2)+1)+addAmount,fuelBurnChance+addChance,istack,wasteItem,null);
                 if (found) break;
                 iters++;
             }
         }
-        craft.setDataTag("has_fuel",(Boolean)found);
+        craft.setDataTag("has_fuel",found);
         return found;
     }
     public boolean forceCheckFuel(final Craft craft, int fuelBurnRate, double percBurnChance, ItemStack fuelItem, ItemStack wasteItem, Collection<MovecraftLocation> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         if (craft.getSinking()) return true;
         if (!(craft instanceof PlayerCraft)) return true;
         int chance = 1;
@@ -382,11 +590,13 @@ public class CraftManager implements Iterable<Craft>{
                             if (chance >= 99) {
                                 stack = reduceItemStack(stack,fuelBurnRate);
                                 inv.setItem(itr,stack);
+                            //    state.update(false,false);
                                 return true;
                             }
                             if ((int)chance <= (int)percBurnChance - 5) {
                                 stack = reduceItemStack(stack,fuelBurnRate);
                                 inv.setItem(itr,stack);
+                            //    state.update(false,false);
                             }
                             return true;
                         }
@@ -436,16 +646,23 @@ public class CraftManager implements Iterable<Craft>{
     }
     public int getItemCountFromCraft(Craft craft, ItemStack item, Collection<Block> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         if (craft.getSinking())
             return 0;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return 0;
         if (craft instanceof SinkingCraftImpl)
             return 0;
         int foundAmount = 0;
         boolean barrelFound = false;
-        final Set<Block> blocks = Sets.newHashSet(getItemContainersFromCraft(craft,item,null));
+        final Set<Block> blocks;
+        if (blockCollection != null && blockCollection.size() > 0) {
+            blocks = Sets.newHashSet();
+            blocks.addAll(blockCollection);
+        } else {
+            blocks = getItemContainersFromCraft(craft,item,null);
+            blocks.addAll(blockCollection);
+        }
         for (Block invBlock : blocks) {
             if (invBlock == null) continue;
             if (invBlock.getState() instanceof Container container) {
@@ -470,11 +687,11 @@ public class CraftManager implements Iterable<Craft>{
     }
     public Set<Block> getAndTrackItemsOnCraft(Craft craft, ItemStack item, Material mat, Collection<Block> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         final Set<Block> blockList = Sets.newHashSet(getItemContainersFromCraft(craft,item,mat,blockCollection));
         if (craft.getSinking())
             return blockList;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return blockList;
         if (craft instanceof SinkingCraftImpl)
             return blockList;
@@ -483,11 +700,11 @@ public class CraftManager implements Iterable<Craft>{
     }
     public Set<Block> getAndTrackItemsOnCraft(Craft craft, ItemStack item, Collection<Block> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         final Set<Block> blockList = Sets.newHashSet(getItemContainersFromCraft(craft,item,blockCollection));
         if (craft.getSinking())
             return blockList;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return blockList;
         if (craft instanceof SinkingCraftImpl)
             return blockList;
@@ -501,47 +718,59 @@ public class CraftManager implements Iterable<Craft>{
 
     public Set<Block> removeAndTrackItemsOnCraft(Craft craft, ItemStack item, Collection<Block> blockCollection, int amount) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         final Set<Block> blockList = Sets.newHashSet(getItemContainersFromCraft(craft,item,blockCollection));
         if (craft.getSinking())
             return blockList;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return blockList;
         if (craft instanceof SinkingCraftImpl)
             return blockList;
-        boolean found = false;
+        int amnt = getItemCountFromCraft(craft,item,blockList);
+        if (amnt < amount) {
+            blockList.clear();
+            return blockList;
+        }
+        if (amnt <= 0) {
+            blockList.clear();
+            return blockList;
+        }
+        int counter = 0;
         for (Block invBlock : blockList) {
             if (invBlock == null) continue;
-            if (found) break;
             if (invBlock.getState() instanceof Container state) {
                 if (((state).getInventory().getContents()) == null) continue;
                 Inventory inv = state.getInventory();
                 //ListIterator<ItemStack> listIterator1 = state.getInventory().iterator();
-                for (int itr = 0; itr < inv.getSize(); itr++) {
-                //while (listIterator1.hasNext()) {
-                    //ItemStack stack = listIterator1.next();
-                    ItemStack stack = inv.getItem(itr);
-                    if (stack == null) continue;
-                    if (isSimilar(item,stack)) {
-                        stack = reduceItemStack(stack,amount);
-                        inv.setItem(itr,stack);
-                        found = true;
+                for (int bitr = 0; bitr < amount; bitr++) {
+                    for (int itr = 0; itr < inv.getSize(); itr++) {
+                    //while (listIterator1.hasNext()) {
+                        //ItemStack stack = listIterator1.next();
+                        ItemStack stack = inv.getItem(itr);
+                        if (stack == null) continue;
+                        if (isSimilar(item,stack)) {
+                            stack = reduceItemStack(stack,1);
+                            inv.setItem(itr,stack);
+                            counter++;
+                        }
+                        if (counter >= amount) break;
                     }
-                    if (found) break;
+                    if (counter >= amount) break;
                 }
-            //    state.update(false,false);
             }
+            if (counter >= amount) break;
         }
         ((BaseCraft)craft).setTrackedBlocks(item,blockList);
         return blockList;
     }
+
     public Set<Block> getItemContainersFromCraft(Craft craft, ItemStack item, Material mat, Collection<Block> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         final Set<Block> blockList = Sets.newHashSet();
         if (craft.getSinking())
             return blockList;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return blockList;
         if (craft instanceof SinkingCraftImpl)
             return blockList;
@@ -573,11 +802,11 @@ public class CraftManager implements Iterable<Craft>{
 
     public Set<Block> getItemContainersFromCraft(Craft craft, ItemStack item, Collection<Block> blockCollection) {
 
-        //String composite_block = "minecraft:note_block[instrument=hat,note=15,powered=false]";
+
         final Set<Block> blockList = Sets.newHashSet();
         if (craft.getSinking())
             return blockList;
-        if (craft.isAutomated())
+        if (craft instanceof NPCCraftImpl)
             return blockList;
         if (craft instanceof SinkingCraftImpl)
             return blockList;
@@ -708,11 +937,12 @@ public class CraftManager implements Iterable<Craft>{
         if (!c.isNotProcessing()) return false;
         int originalEngine = (Integer)c.getDataTag("origin_engine");
         int currentEngine = (Integer)c.getDataTag("current_engine");
+        if (currentEngine < originalEngine) updateCraftHealthBlocks(c);
         double disabledPerc = c.getType().getDoubleProperty(CraftType.DISABLE_PERCENT);
         int count = 0;
         Set<Material> engineTypes = c.getType().getMoveBlocks();
         if (engineTypes.size() <= 0) return false;
-        for (final MovecraftLocation b : c.getTrackedMovecraftLocsAboard("engine_locs")) {
+        for (final MovecraftLocation b : c.getTrackedMovecraftLocs("engine_locs")) {
             if (b == null) continue;
             if (engineTypes.contains(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(b,c.getWorld()))) count++;
         }
@@ -725,7 +955,7 @@ public class CraftManager implements Iterable<Craft>{
             currentEngine = count;
         }
         int disableAmount = (int)Math.floor((double)currentEngine * threshold);
-        if (currentEngine < disableAmount || currentEngine == 0) {
+        if (currentEngine < disableAmount) {
             return true;
         }
         return false;
@@ -736,6 +966,8 @@ public class CraftManager implements Iterable<Craft>{
         if (c instanceof SubCraft) return false;
         if (c.getSinking()) return false;
         if (!c.isNotProcessing()) return false;
+        if (c.getDataTag("origin_size") == null) c.setDataTag("origin_size",(Integer)c.getOrigBlockCount());
+        if (c.getDataTag("current_size") == null) c.setDataTag("current_size",(Integer)c.getOrigBlockCount());
         int originalSize = (Integer)c.getDataTag("origin_size");
         int currentSize = (Integer)c.getDataTag("current_size");
         double overallSinkPerc = c.getType().getDoubleProperty(CraftType.OVERALL_SINK_PERCENT);
@@ -774,11 +1006,12 @@ public class CraftManager implements Iterable<Craft>{
         if (!c.isNotProcessing()) return false;
         int originalLift = (Integer)c.getDataTag("origin_lift");
         int currentLift = (Integer)c.getDataTag("current_lift");
+        if (currentLift < originalLift) updateCraftHealthBlocks(c);
         double liftSinkPerc = c.getType().getDoubleProperty(CraftType.SINK_PERCENT);
         int count = 0;
         Set<Material> liftTypes = c.getType().getFlyBlocks();
         if (liftTypes.size() <= 0) return false;
-        for (final MovecraftLocation b : c.getTrackedMovecraftLocsAboard("lift_locs")) {
+        for (final MovecraftLocation b : c.getTrackedMovecraftLocs("lift_locs")) {
             if (b == null) continue;
             if (liftTypes.contains(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(b,c.getWorld()))) count++;
         }
@@ -786,15 +1019,38 @@ public class CraftManager implements Iterable<Craft>{
 
         if (liftSinkPerc > 1.0) threshold = liftSinkPerc / 100.0d;
         else threshold = liftSinkPerc;
-        if (count > 0) {
+        if (count > 0 && (Integer)c.getDataTag("current_lift") > count) {
             c.setDataTag("current_lift",(Integer)count);
             currentLift = count;
         }
         int sinkAmount = (int)Math.floor((double)originalLift * threshold);
         if (currentLift < sinkAmount) {
+            Movecraft.getInstance().getLogger().info("Craft "+c.toString()+"'s Current Lift "+currentLift+", Original Lift "+originalLift+", Sink Threshold "+sinkAmount+"");
             return true;
         }
         return false;
+    }
+
+    public double get_lift_required(Craft c) {
+        if (c == null) return 0.0;
+        if (c instanceof SubCraft) return 0.0;
+        if (c.getSinking()) return 0.0;
+        if (!c.isNotProcessing()) return 0.0;
+        int originalLift = (Integer)c.getDataTag("origin_lift");
+        int currentLift = (Integer)c.getDataTag("current_lift");
+        double liftSinkPerc = c.getType().getDoubleProperty(CraftType.SINK_PERCENT);
+        int count = 0;
+        Set<Material> liftTypes = c.getType().getFlyBlocks();
+        if (liftTypes.size() <= 0) return 0.0;
+        for (final MovecraftLocation b : c.getTrackedMovecraftLocs("lift_locs")) {
+            if (b == null) continue;
+            if (liftTypes.contains(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(b,c.getWorld()))) count++;
+        }
+        double threshold = 0.1d;
+
+        if (liftSinkPerc > 1.0) threshold = liftSinkPerc / 100.0d;
+        else threshold = liftSinkPerc;
+        return liftSinkPerc*100.0d;
     }
 
 
@@ -803,7 +1059,7 @@ public class CraftManager implements Iterable<Craft>{
         HashSet<Block> last = new HashSet<>();
         last.add(start);
         if (max <= 0) max = 25600;
-        if (craft.getOrigBlockCount()>=256000) return locs;
+        if (craft.getOrigBlockCount()>=950000) return locs;
         boolean found = true;
         while (found) {
             found = false;
@@ -841,7 +1097,7 @@ public class CraftManager implements Iterable<Craft>{
         HashSet<Block> last = new HashSet<>();
         last.add(start);
         if (max <= 0) max = 25600;
-        if (craft.getOrigBlockCount()>=256000)
+        if (craft.getOrigBlockCount()>=950000)
             return locs;
         boolean found = true;
         while (found) {
@@ -875,7 +1131,8 @@ public class CraftManager implements Iterable<Craft>{
         }
         return locs;
     }
-    public HitBox detectBaseCraftExterior(Craft craft) {
+
+    public HitBox detectCraftExterior(Craft craft) {
         if (((BaseCraft)craft).getTrackedLocations("valid_exterior").size() <= 0) {
             final HitBox hitBox = new BitmapHitBox(craft.getHitBox());
             final HitBox boundingHitBox = new BitmapHitBox(craft.getHitBox().boundingHitBox());
@@ -888,18 +1145,6 @@ public class CraftManager implements Iterable<Craft>{
         } else {
             return (new BitmapHitBox(((BaseCraft)craft).getTrackedMovecraftLocs("valid_exterior")));
         }
-    }
-    
-    public HitBox detectCraftExterior(Craft craft) {
-        if (craft instanceof BaseCraft) {
-            return detectBaseCraftExterior(((BaseCraft)craft));
-        }
-        final HitBox hitBox = new BitmapHitBox(craft.getHitBox());
-        final HitBox boundingHitBox = new BitmapHitBox(craft.getHitBox().boundingHitBox());
-        final HitBox invertBox = new SetHitBox(Sets.difference(boundingHitBox.asSet(), hitBox.asSet()));
-        final HitBox validExterior = detectInvertedBox(craft);
-        final HitBox confirmedExtBox = new BitmapHitBox(detectValidExterior(craft));
-        return confirmedExtBox;
     }
     
 
@@ -977,9 +1222,11 @@ public class CraftManager implements Iterable<Craft>{
                 }
             }
         }
-        if (craft.getHitBox().size()+(craft.getHitBox().size()/4) >= interiorSet.size()) {
+        if (craft.getHitBox().size()+(int)(craft.getHitBox().size()/1.25) >= interiorSet.size()) {
+            //interior.addAll(interiorSet);
             craft.setTrackedMovecraftLocs("air",interiorSet);
-            interior.addAll(interiorSet);
+            ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
+            //craft.setHitBox(craft.getHitBox().union(interior));
             BlockData waterData = Movecraft.getInstance().getWaterBlockData();
             if (waterLine != -64 && waterLine != -128) return interior;
             for (final MovecraftLocation location : craft.getHitBox()) {
@@ -1098,10 +1345,8 @@ public class CraftManager implements Iterable<Craft>{
                 return;
         }
         crafts.remove(craft);
-        if(craft instanceof PlayerCraft) {
+        if(craft instanceof PlayerCraft)
             playerCrafts.remove(((PlayerCraft) craft).getPilot());
-            this.craftPlayerIndex.remove(((PlayerCraft) craft).getPilot());
-        }
 
         Movecraft.getInstance().getLogger().info("RELEASE REASON : "+reason);
         if(craft.getHitBox().isEmpty())
@@ -1197,6 +1442,22 @@ public class CraftManager implements Iterable<Craft>{
                         @NotNull World world, @Nullable Player player,
                         @NotNull Audience audience,
                         @NotNull Function<Craft, Effect> postDetection) {
+        /*boolean ran = false;
+        if (Settings.IS_MULTITHREADED && Settings.Debug) {
+            try {
+                WorldDetectionTask supplied = new WorldDetectionTask(
+                        startPoint, CachedMovecraftWorld.of(world),
+                        type, supplier,
+                        world, player,
+                        audience,
+                        postDetection
+                );
+                handler.runTaskInWorld(supplied.get(Settings.Debug), world);
+                ran = true;
+            } catch(Exception exc){
+                exc.printStackTrace();
+            }
+        }*/
         
         WorldManager.INSTANCE.submit(new DetectionTask(
                 startPoint, CachedMovecraftWorld.of(world),
@@ -1304,6 +1565,91 @@ public class CraftManager implements Iterable<Craft>{
         }
     }
 
+    public HitBox generateHitbox(@NotNull CraftType craftType, Block b, String player) {
+        MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
+        World world = (World)b.getWorld();
+        var parent = this.getCraftFromBlock(b);
+        if ((parent != null) && (parent instanceof PlayerCraftImpl)){
+            BitmapHitBox box = new BitmapHitBox(parent.getHitBox());
+            box.remove(startPoint);
+            parent.setHitBox(box);
+        }
+        final List<String> ignored = Lists.newArrayList();
+        Craft result = this.detectHitBox(ignored,
+                startPoint,
+                craftType, (type, w, p, parents) -> {
+                    return new Pair<>(Result.succeed(),
+                            new NPCCraftImpl(type, w, p));
+                },
+                world, null,
+                Movecraft.getAdventure().console(),
+                craft -> () -> {
+                    if (parent != null) {
+                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());
+                        parent.setHitBox(newHitbox);
+                        parent.setOrigBlockCount(parent.getOrigBlockCount() - craft.getHitBox().size());
+                    }
+                    forceRemoveCraft(craft);
+                    Movecraft.getInstance().getLogger().warning("Generating Hitbox: "+craft.getHitBox()+" @ "+startPoint+" In world:"+ world.getName());
+                }
+        );
+        Movecraft.getInstance().getLogger().warning("Verifying Generated Hitbox: "+result+" @ "+startPoint+" In world:"+ world.getName());
+      HitBox hbox = result.getHitBox();
+      forceRemoveCraft(result);
+      return hbox;
+    }
+
+    public Craft detectCraftFromBlocks(@NotNull CraftType craftType, Block start, Collection<Block> blocks) {
+        MovecraftLocation startPoint = new MovecraftLocation(start.getX(), start.getY(), start.getZ());
+        World world = (World)start.getWorld();
+        var parent = this.getCraftFromBlock(start);
+        if ((parent != null) && (parent instanceof PlayerCraftImpl)){
+            BitmapHitBox box = new BitmapHitBox(parent.getHitBox());
+            box.remove(startPoint);
+            parent.setHitBox(box);
+        }
+        final BitmapHitBox box = new BitmapHitBox();
+        box.add(startPoint);
+        for (Block block : blocks) {
+            box.add(MathUtils.bukkit2MovecraftLoc(block.getLocation()));
+        }
+        NPCCraftImpl craft = new NPCCraftImpl(craftType, world);
+        craft.setHitBox(box);
+        craft.setWorld(world);
+        return craft;
+    }
+
+    public Craft forceUnsafeCraftPilot(@NotNull CraftType craftType, Block b, String player) {
+        MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
+        World world = (World)b.getWorld();
+        var parent = this.getCraftFromBlock(b);
+        if ((parent != null) && (parent instanceof PlayerCraftImpl)){
+            BitmapHitBox box = new BitmapHitBox(parent.getHitBox());
+            box.remove(startPoint);
+            parent.setHitBox(box);
+        }
+        this.detectCraftUnsafe(
+                startPoint,
+                craftType, (type, w, p, parents) -> {
+                    return new Pair<>(Result.succeed(),
+                            new NPCCraftImpl(type, w, p));
+                },
+                world, null,
+                Movecraft.getAdventure().console(),
+                craft -> () -> {
+                    if (parent != null) {
+                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());
+                        parent.setHitBox(newHitbox);
+                        parent.setOrigBlockCount(parent.getOrigBlockCount() - craft.getHitBox().size());
+                    }
+                    Movecraft.getInstance().getLogger().warning("Piloting AutoCraft: "+craft+" @ "+startPoint+" In world:"+ world.getName());
+                    //Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.PLAYER));
+                }
+        );
+        Movecraft.getInstance().getLogger().warning("Verifying AutoCraft: "+this.getCraftFromBlock(b)+" @ "+startPoint+" In world:"+ world.getName());
+      return (this.getCraftFromBlock(b));
+    }
+
 
 
     public Craft forceCraftPilotIgnoreMat(@NotNull CraftType craftType, Block b, Player player, List<String> matIgnored) {
@@ -1333,6 +1679,48 @@ public class CraftManager implements Iterable<Craft>{
                 }
         );
         return (this.getCraftFromBlock(b));
+    }
+
+    public Craft forceAutoCraftPilot(@NotNull CraftType craftType, Block b, final String player) {
+        MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
+        World world = (World)b.getWorld();
+        var parent = this.getCraftFromBlock(b);
+        if ((parent != null) && !(parent instanceof NPCCraftImpl)){
+            BitmapHitBox box = new BitmapHitBox(parent.getHitBox());
+            box.remove(startPoint);
+            parent.setHitBox(box);
+            forceRemoveCraft(parent);
+        }
+        Craft output = this.detect(
+                startPoint,
+                craftType, (type, w, p, parents) -> {
+                   if (parents.size() == 1)
+                            return new Pair<>(Result.failWithMessage(I18nSupport.getInternationalisedString(
+                                    "Detection - Failed - Already commanding a craft")), null);
+
+                        return new Pair<>(Result.succeed(),
+                                new NPCCraftImpl(type, w, p));
+                },
+                world, null,
+                Movecraft.getAdventure().console(),
+                craft -> () -> {
+                    if (parent != null) {
+                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());
+                        parent.setHitBox(newHitbox);
+                        parent.setOrigBlockCount(parent.getOrigBlockCount() - craft.getHitBox().size());
+                    }
+                    Movecraft.getInstance().getLogger().warning("Piloting NPCCraft: "+craft+" @ "+craft.getMidPoint()+" In world:"+ world.getName());
+                    if (craft instanceof NPCCraftImpl) {
+                        craft.setAutomated(true);
+                        craft.setNPCTag(player);
+                    }
+                    detectCraftHealthBlocks(craft);
+                    craft.setProcessing(false);
+                    //Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.PLAYER));
+                }
+        );
+        Movecraft.getInstance().getLogger().warning("Verifying NPCCraft: "+output+" @ "+startPoint+" In world:"+ world.getName());
+        return output;
     }
 
 
@@ -1398,8 +1786,7 @@ public class CraftManager implements Iterable<Craft>{
                         var newHitbox = parent.getHitBox().difference(craft.getHitBox());
                         parent.setHitBox(newHitbox);
                         parent.setOrigBlockCount(parent.getOrigBlockCount() - craft.getHitBox().size());
-                    }
-                    else {
+                    } else {
                         // Release old craft if it exists
                         Craft oldCraft = this.getCraftByPlayer(player);
                         if (oldCraft != null)
@@ -1410,51 +1797,52 @@ public class CraftManager implements Iterable<Craft>{
         return (this.getCraftFromBlock(b));
     }
 
+    public Craft forceUnsafeSubCraftMove(@NotNull CraftType craftType, String player, Block b, @Nullable Location targetLoc) {
+      MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
+      World world = (World)b.getWorld();
+      var parent = this.getCraftFromBlock(b);
+      if ((parent != null) && (parent instanceof PlayerCraftImpl)){
+          BitmapHitBox box = new BitmapHitBox(parent.getHitBox());
+          box.remove(startPoint);
+          parent.setHitBox(box);
+      }
+      this.detect(
+              startPoint,
+              craftType, (type, w, p, parents) -> {
+                 if (parents.size() > 1)
+                          return new Pair<>(Result.failWithMessage(I18nSupport.getInternationalisedString(
+                                  "Detection - Failed - Already commanding a craft")), null);
+
+                      return new Pair<>(Result.succeed(),
+                              new NPCCraftImpl(type, w, p));
+              },
+              world, null,
+              Movecraft.getAdventure().console(),
+              craft -> () -> {
+                  if (parent != null) {
+                      var newHitbox = parent.getHitBox().difference(craft.getHitBox());
+                      parent.setHitBox(newHitbox);
+                      parent.setOrigBlockCount(parent.getOrigBlockCount() - craft.getHitBox().size());
+                  }
+                  Movecraft.getInstance().getLogger().warning("Piloting AutoCraft: "+craft+" @ "+startPoint+" In world:"+ world.getName());
+                  //Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.PLAYER));
+              }
+      );
+      Movecraft.getInstance().getLogger().warning("Verifying AutoCraft: "+this.getCraftFromBlock(b)+" @ "+startPoint+" In world:"+ world.getName());
+    Craft craft = parent;
+    if (this.getCraftFromBlock(b) != null) {
+        ((NPCCraftImpl)this.getCraftFromBlock(b)).setAutomated(false);
+        ((NPCCraftImpl)this.getCraftFromBlock(b)).setNPCTag(player);
+        ((NPCCraftImpl)this.getCraftFromBlock(b)).translate((int)targetLoc.getX(),(int)targetLoc.getY(),(int)targetLoc.getZ());
+        craft = (this.getCraftFromBlock(b));
+    }
+    return craft;
+  }
+
     public void forceCraftRotate(@NotNull Craft c, Block b, @NotNull MovecraftRotation rotation) {
         MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
         Movecraft.getInstance().getLogger().warning("Forcing Craft to Rotate: "+c+" @ "+startPoint+" @ Rotation: "+rotation);
         c.rotate(rotation, startPoint, false);
-    }
-
-    public void forceSubCraftRotate(@NotNull CraftType craftType, Block b, Player player, @NotNull MovecraftRotation rotation) {
-        MovecraftLocation startPoint = new MovecraftLocation(b.getX(), b.getY(), b.getZ());
-        World world = b.getWorld();
-        this.detect(
-                startPoint,
-                craftType, (type, w, p, parents) -> {
-                    if (parents.size() > 1)
-                        return new Pair<>(Result.failWithMessage(I18nSupport.getInternationalisedString(
-                                "Detection - Failed - Already commanding a craft")), null);
-                    if (parents.size() < 1)
-                        return new Pair<>(Result.succeed(), new SubcraftRotateCraft(type, w, p));
-
-                    Craft parent = parents.iterator().next();
-                    return new Pair<>(Result.succeed(), new SubCraftImpl(type, w, parent));
-                },
-                world, player,
-                Movecraft.getAdventure().player(player),
-                craft -> () -> {
-                    Bukkit.getServer().getPluginManager().callEvent(new CraftPilotEvent(craft, CraftPilotEvent.Reason.SUB_CRAFT));
-                    if (craft instanceof SubCraft) { // Subtract craft from the parent
-                        Craft parent = ((SubCraft) craft).getParent();
-                        var newHitbox = parent.getHitBox().difference(craft.getHitBox());;
-                        parent.setHitBox(newHitbox);
-                    }
-                    craft.rotate(rotation, startPoint, true);
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (craft instanceof SubCraft) {
-                                Craft parent = ((SubCraft) craft).getParent();
-                                var newHitbox = parent.getHitBox().union(craft.getHitBox());
-                                parent.setHitBox(newHitbox);
-                            }
-                            removeCraft(craft, CraftReleaseEvent.Reason.SUB_CRAFT);
-                        }
-                    }.runTaskLater(Movecraft.getInstance(), 5);
-                }
-        );
     }
 
     @Nullable
@@ -1531,21 +1919,36 @@ public class CraftManager implements Iterable<Craft>{
         return false;
     }
 
+    public Craft getCraftFromBlockState(BlockState bs){
+        if (bs == null) return null;
+        for (Craft i : getCraftsInWorld(bs.getWorld())) {
+            if (i == null) continue;
+            if (!Tags.FALL_THROUGH_BLOCKS.contains(bs.getType())) {
+                if (MathUtils.locationNearHitBox(i.getHitBox(),(MathUtils.bukkit2MovecraftLoc(bs.getLocation())),1d)) return i;
+                //if (i.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(bs.getLocation()))) return i;
+            }
+            if (MathUtils.locationNearHitBox(i.getHitBox(),(MathUtils.bukkit2MovecraftLoc(bs.getLocation())),1d)) return i;
+            //if (i.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(bs.getLocation()))) return i;
+        }
+        return null;
+    }
+
     public Craft getCraftFromBlock(Block b){
         if (b == null) return null;
         for (Craft i : getCraftsInWorld(b.getWorld())) {
             if (i == null) continue;
-            if (i.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(b.getLocation()))) return i;
             if (!Tags.FALL_THROUGH_BLOCKS.contains(b.getType())) {
-                if (MathUtils.locationNearHitBox(i.getHitBox(),(MathUtils.bukkit2MovecraftLoc(b.getLocation())),1d)) {
-                    return i;
-                }
+                if (MathUtils.locationNearHitBox(i.getHitBox(),(MathUtils.bukkit2MovecraftLoc(b.getLocation())),1d)) return i;
+                //if (i.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(b.getLocation()))) return i;
             }
+            if (MathUtils.locationNearHitBox(i.getHitBox(),(MathUtils.bukkit2MovecraftLoc(b.getLocation())),1d)) return i;
+            //if (i.getHitBox().contains(MathUtils.bukkit2MovecraftLoc(b.getLocation()))) return i;
         }
         return null;
     }
+
     public boolean isEqualSign(Sign test, String target) {
-        return !ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(REMOTE_SIGN_HEADER) && ( ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(target)
+        return !ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(HEADER) && ( ChatColor.stripColor(test.getLine(0)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(1)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(2)).equalsIgnoreCase(target)
                 || ChatColor.stripColor(test.getLine(3)).equalsIgnoreCase(target) );
@@ -1702,7 +2105,7 @@ public class CraftManager implements Iterable<Craft>{
 
     @NotNull
     public long getTimeFromOverboard(Player player) {
-        return overboards.getOrDefault(player, (Long)0L);
+        return overboards.getOrDefault(player, 0L);
     }
 
     @Nullable

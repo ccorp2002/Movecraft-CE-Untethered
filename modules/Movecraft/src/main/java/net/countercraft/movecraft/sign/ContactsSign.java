@@ -1,27 +1,44 @@
 package net.countercraft.movecraft.sign;
 
-import com.google.common.collect.Lists;
+import net.countercraft.movecraft.util.radar.RadarMap;
+import net.countercraft.movecraft.util.radar.RadarUtils;
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.type.CraftType;
+import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.SignTranslateEvent;
+import net.countercraft.movecraft.CruiseDirection;
+import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.events.CraftDetectEvent;
-import net.countercraft.movecraft.events.SignTranslateEvent;
-import net.countercraft.movecraft.util.radar.RadarMap;
+import net.countercraft.movecraft.localisation.I18nSupport;
 import org.bukkit.ChatColor;
 import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
+import org.bukkit.Tag;
+import org.bukkit.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
+
+import com.google.common.collect.Lists;
 
 public class ContactsSign implements Listener{
 

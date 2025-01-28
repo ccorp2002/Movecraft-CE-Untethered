@@ -1,38 +1,116 @@
 package net.countercraft.movecraft.craft;
 
-import net.countercraft.movecraft.*;
-import net.countercraft.movecraft.util.radar.RadarMap;
+import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.TrackedLocation;
+import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.CruiseDirection;
+import net.countercraft.movecraft.MovecraftRotation;
 import net.countercraft.movecraft.async.rotation.RotationTask;
 import net.countercraft.movecraft.async.translation.TranslationTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.type.CraftType;
+import net.countercraft.movecraft.events.CraftSinkEvent;
+import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.processing.CachedMovecraftWorld;
 import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.WorldManager;
 import net.countercraft.movecraft.util.Counter;
-import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.Tags;
 import net.countercraft.movecraft.util.TimingData;
-import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
+import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
 import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
 import net.countercraft.movecraft.util.hitboxes.SetHitBox;
+import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.WallSign;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import net.countercraft.movecraft.util.CollectionUtils;
+import net.countercraft.movecraft.util.MathUtils;
+//import com.github.milkdrinkers.customblockdata.*;
+
+
+
+import org.bukkit.util.Vector;
+import org.bukkit.util.BlockVector;
+import org.bukkit.Axis;
+import org.bukkit.block.Banner;
+import org.bukkit.block.Beacon;
+import org.bukkit.block.Beehive;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Campfire;
+import org.bukkit.block.CommandBlock;
+import org.bukkit.block.Container;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.EndGateway;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Jukebox;
+import org.bukkit.block.Lectern;
+import org.bukkit.block.Lockable;
+import org.bukkit.block.Sign;
+import org.bukkit.block.Skull;
+import org.bukkit.block.Structure;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.MultipleFacing;
+import org.bukkit.block.data.Orientable;
+import org.bukkit.block.data.Rail;
+import org.bukkit.block.data.Rotatable;
+import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.type.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.WeakHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-
+import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import static net.countercraft.movecraft.util.SignUtils.getFacing;
 
 public abstract class BaseCraft implements Craft {
@@ -50,7 +128,7 @@ public abstract class BaseCraft implements Craft {
     @Nullable
     public final Set<Entity> passengers = new HashSet<>();
     @Nullable
-    private Set<Craft> contacts = new HashSet<>();
+    public Set<Craft> contacts = new HashSet<>();
     @NotNull
     public HitBox hitBox;
     @NotNull
@@ -67,7 +145,7 @@ public abstract class BaseCraft implements Craft {
     private long lastTeleportTime;
     private int lastDX, lastDY, lastDZ;
     private int currentGear = 1;
-    private int burningFuel = 0;
+    private int burningFuel = 2;
     private int fuel = this.burningFuel;
     private int origBlockCount;
     @Nullable
@@ -82,9 +160,9 @@ public abstract class BaseCraft implements Craft {
     @NotNull
     private MovecraftLocation lastTranslation = new MovecraftLocation(0, 0, 0);
     public boolean sinking;
-    private HashMap<Object, Collection<TrackedLocation>> trackedLocations = new HashMap<>(100_000,0.5f);
+    public HashMap<Object, Collection<TrackedLocation>> trackedLocations = new HashMap<>(100_000,0.5f);
 
-    private HashMap<String, Object> craftTags = new HashMap<>(100_000,0.5f);
+    public HashMap<String, Object> craftTags = new HashMap<>(100_000,0.5f);
     public MovecraftLocation midPoint = null;
     private long lastMoveTime;
 
@@ -97,7 +175,7 @@ public abstract class BaseCraft implements Craft {
         String sloc = loc.getBlockX()+","+loc.getBlockY()+","+loc.getBlockZ()+","+loc.getWorld().getName();
         String pilotUUID = "";
         String extra = "";
-        if (this.isAutomated()) {
+        if (this instanceof NPCCraftImpl) {
             pilotUUID = pilotUUID + getNPCTag();
             extra = "";
         } else if (this instanceof PlayerCraftImpl && getNotificationPlayer() != null) {
@@ -252,6 +330,17 @@ public abstract class BaseCraft implements Craft {
         return mlocs;
     }
 
+    public Collection<Block> getBlockDataNoCache(BlockData bkd){
+        final ArrayList<Block> blocks = new ArrayList<>();
+        for (MovecraftLocation l : hitBox){
+            if (Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(l,this.getWorld()).getBlockData().equals(bkd)) {
+                blocks.add(Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(l,this.getWorld()));
+
+            }
+        }
+        return blocks;
+    }
+
     public Collection<Block> getBlockData(BlockData bkd){
         final ArrayList<Block> blocks = new ArrayList<>();
         if (isTrackingKey(bkd)) {
@@ -310,7 +399,7 @@ public abstract class BaseCraft implements Craft {
         return getBlockName(s,false);
     }
 
-    public Collection<Block> getBlockName(String s, Boolean async){
+    public Collection<Block> getBlockName(String s, boolean async){
         final Set<Block> blocks = new HashSet<>();
         final Set<MovecraftLocation> mlocs = new HashSet<>();
         async = false;
@@ -321,8 +410,10 @@ public abstract class BaseCraft implements Craft {
                 blocks.add(Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(l,this.getWorld()));
                 mlocs.add(l);
             }
-            this.setTrackedMovecraftLocs(s.toLowerCase(),mlocs);
-            return blocks;
+            if (blocks.size() > 0 && mlocs.size() > 0) {
+                this.setTrackedMovecraftLocs(s.toLowerCase(),mlocs);
+                return blocks;
+            }
         }
         for (MovecraftLocation l : (this.hitBox)){
             if (CraftManager.containsIgnoreCase(Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(l,this.getWorld()).name(), s)) {
@@ -354,6 +445,19 @@ public abstract class BaseCraft implements Craft {
             }
         }
         this.setTrackedMovecraftLocs(mat,mlocs);
+        return blocks;
+    }
+
+    public Collection<Block> getBlockTypeNoCache(Material mat){
+        //ChunkManager.addChunksToLoad(ChunkManager.getChunks((new SetHitBox(this.hitBox)).locations,this.w));
+        final Set<Block> blocks = new HashSet<>();
+        final Set<MovecraftLocation> mlocs = new HashSet<>();
+        for (MovecraftLocation l : this.hitBox){
+            if (Movecraft.getInstance().getWorldHandler().toBukkitBlockFast(l,this.getWorld()) == (mat)) {
+                blocks.add(Movecraft.getInstance().getWorldHandler().getBukkitBlockFast(l,this.getWorld()));
+                mlocs.add(l);
+            }
+        }
         return blocks;
     }
 
@@ -453,6 +557,7 @@ public abstract class BaseCraft implements Craft {
         }
         setCurrentGear(1);
         Movecraft.getInstance().getAsyncManager().submitTask(new TranslationTask(this, dw, dx, dy, dz), this);
+        setLastTeleportTime(System.currentTimeMillis());
         setCurrentGear(currentGear);
     }
     public void teleport(@Nullable World world, int x, int y, int z) {
@@ -476,6 +581,7 @@ public abstract class BaseCraft implements Craft {
         }
         setCurrentGear(1);
         Movecraft.getInstance().getAsyncManager().submitTask(new TranslationTask(this, dw, dx, dy, dz), this);
+        setLastTeleportTime(System.currentTimeMillis());
         setCurrentGear(currentGear);
     }
 
@@ -542,8 +648,10 @@ public abstract class BaseCraft implements Craft {
 
         Movecraft.getInstance().getAsyncManager().submitTask(new TranslationTask(this, world, dx, dy, dz), this);
 
+        updateLastMoveTime();
         setLastTranslation(new MovecraftLocation(dx, dy, dz));
     }
+
 
     public void addBlock(Block b) {
         MutableHitBox box = (MutableHitBox)(this.hitBox);
@@ -686,7 +794,6 @@ public abstract class BaseCraft implements Craft {
         for (TrackedLocation o : getRawTrackedMap().get(key)) {
             if (isAboard) {
                 if (!this.hitBox.contains(o.getLocation())) continue;
-                if (o.toBukkit(getWorld()).getBlock().getType().isAir()) continue;
             }
             trackedLocs.add(o);
         }
@@ -712,10 +819,8 @@ public abstract class BaseCraft implements Craft {
     public void setTrackedBlocks(@NotNull Collection<Block> blocks, Object key) {
         final Set<MovecraftLocation> trackedLocs = new HashSet<>();
         for (Block block : blocks) {
-            if (block.getWorld().getName().equals(this.getWorld().getName())) {
-                final MovecraftLocation loc = MathUtils.bukkit2MovecraftLoc(block.getLocation());
-                trackedLocs.add(loc);
-            }
+            final MovecraftLocation loc = MathUtils.bukkit2MovecraftLoc(block.getLocation());
+            trackedLocs.add(loc);
         }
         this.setTrackedMovecraftLocs(key, trackedLocs);
     }
@@ -779,15 +884,18 @@ public abstract class BaseCraft implements Craft {
     }
     
     public void rotate(MovecraftRotation rotation, MovecraftLocation originPoint, boolean isSubCraft) {
-        if (getLastMoveTime() + 1e9 > System.nanoTime()) {
+        if (getLastRotateTime() + 1e9 > System.nanoTime() && !isSubCraft) {
             return;
         }
-        long ticksElapsed = (System.currentTimeMillis() - getLastMoveTime()) / 60;
+        long ticksElapsed = (System.currentTimeMillis() - getLastRotateTime()) / 60;
         if (ticksElapsed <= getSpeed() && !isSubCraft) {
             return;
         }
         if (!isNotProcessing()) return;
+        //if (this instanceof NPCCraftImpl)
+        //  getAudience().sendMessage(I18nSupport.getInternationalisedComponent("NPCCraftImpl ("+this+") ATTEMPTING TO ROTATE (CENTER: "+originPoint+" // ROTATION: "+rotation+")"));
         Movecraft.getInstance().getAsyncManager().submitTask(new RotationTask(this, originPoint, rotation, getWorld(), isSubCraft), this);
+        updateLastMoveTime();
         setLastRotateTime(System.currentTimeMillis());
     }
     /**
@@ -798,8 +906,7 @@ public abstract class BaseCraft implements Craft {
     @NotNull
     
     public Set<Craft> getContacts() {
-        
-        contacts = RadarMap.getRadarContacts(this);
+        contacts.clear();
         /*for (Craft contact : CraftManager.getInstance().getCraftsInWorld(w)) {
             MovecraftLocation ccenter = getHitBox().getMidPoint();
             MovecraftLocation tcenter = contact.getHitBox().getMidPoint();
@@ -852,6 +959,7 @@ public abstract class BaseCraft implements Craft {
                 sign.setLine(0, "Descend: ON");
             }
             try {
+                sign.setWaxed(true);
                 sign.setEditable(false);
             } catch (Exception exc) {
                 sign.setEditable(true);
@@ -874,7 +982,6 @@ public abstract class BaseCraft implements Craft {
             //System.out.println("Found Sign? "+b.getBlockData().toString()+" LINES: 1: "+sign.getLine(0)+" 2: "+sign.getLine(1)+" 3: "+sign.getLine(2));
             if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: ON") || ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: OFF")) {
                 sign.setLine(0, "Cruise: OFF");
-                sign.setEditable(false);
                 if (!(sign.getBlockData() instanceof WallSign)) {
                     continue;
                 }
@@ -891,11 +998,15 @@ public abstract class BaseCraft implements Craft {
             }
             else if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Ascend: ON")) {
                 sign.setLine(0, "Ascend: OFF");
-                sign.setEditable(false);
             }
             else if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Descend: ON")) {
                 sign.setLine(0, "Descend: OFF");
+            }
+            try {
+                sign.setWaxed(true);
                 sign.setEditable(false);
+            } catch (Exception exc) {
+                sign.setEditable(true);
             }
             sign.update();
         }
@@ -1127,7 +1238,7 @@ public abstract class BaseCraft implements Craft {
         //TODO: Remove this temporary system in favor of passthrough blocks
         // Find the waterline from the surrounding terrain or from the static level in the craft type
         if (getWorld().getName().contains("Void") || getWorld().getName().contains("Space") || getWorld().getName().contains("Zone")) return -128;
-        if (hitBox.getMinY() >= 500) return -128;
+        if (hitBox.getMinY() >= 480 || getOrigBlockCount()>=256_000*4) return -128;
         int waterLine = type.getIntProperty(CraftType.STATIC_WATER_LEVEL);
         if ((type.getIntProperty(CraftType.STATIC_WATER_LEVEL) != -64 && type.getIntProperty(CraftType.STATIC_WATER_LEVEL) != -128) || hitBox.isEmpty()) {
             return type.getIntProperty(CraftType.STATIC_WATER_LEVEL);

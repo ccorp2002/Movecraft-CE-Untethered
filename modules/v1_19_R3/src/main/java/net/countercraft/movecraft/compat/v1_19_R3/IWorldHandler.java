@@ -336,6 +336,13 @@ public class IWorldHandler extends WorldHandler {
     }
 
     @Nullable
+    public org.bukkit.block.BlockState getBukkitState(@NotNull Location location) {
+        org.bukkit.block.Block data = getBukkitBlockFast(location);
+        if (data == null) return null;
+        return data.getState();
+    }
+
+    @Nullable
     public org.bukkit.Material toBukkitBlockFast(@NotNull Location location) {
         if (location.getWorld() == null)
             return null;
@@ -455,30 +462,11 @@ public class IWorldHandler extends WorldHandler {
     }
     @Override
     public @Nullable Location getAccessLocation(@NotNull InventoryView inventoryView) {
-        AbstractContainerMenu menu = ((CraftInventoryView) inventoryView).getHandle();
-        Field field = UnsafeUtils.getFieldOfType(ContainerLevelAccess.class, menu.getClass());
-        if (field != null) {
-            try {
-                field.setAccessible(true);
-                return ((ContainerLevelAccess) field.get(menu)).getLocation();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
         return null;
     }
 
     @Override
-    public void setAccessLocation(@NotNull InventoryView inventoryView, @NotNull Location location) {
-        if (location.getWorld() == null)
-            return;
-        ServerLevel level = ((CraftWorld) location.getWorld()).getHandle();
-        BlockPos position = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        ContainerLevelAccess access = ContainerLevelAccess.create(level, position);
-
-        AbstractContainerMenu menu = ((CraftInventoryView) inventoryView).getHandle();
-        UnsafeUtils.trySetFieldOfType(ContainerLevelAccess.class, menu, access);
-    }
+    public void setAccessLocation(@NotNull InventoryView inventoryView, @NotNull Location location) {}
 
     @Override
     public void setBlockFast(@NotNull Location location, @NotNull BlockData data){

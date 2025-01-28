@@ -20,6 +20,8 @@ package net.countercraft.movecraft.mapUpdater;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.mapUpdater.update.UpdateCommand;
+import net.countercraft.movecraft.mapUpdater.update.CraftTranslateCommand;
+import net.countercraft.movecraft.mapUpdater.update.CraftRotateCommand;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 

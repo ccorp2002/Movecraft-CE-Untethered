@@ -1,6 +1,7 @@
 package net.countercraft.movecraft.util.radar;
 
 import org.bukkit.Chunk;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 

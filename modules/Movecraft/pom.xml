@@ -38,19 +38,12 @@
             <groupId>net.countercraft</groupId>
             <artifactId>movecraft-v1_19_r3</artifactId>
             <version>${revision}</version>
-            <optional>true</optional> <!-- value will be true or false only -->
+            <optional>false</optional> <!-- value will be true or false only -->
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>net.countercraft</groupId>
-            <artifactId>movecraft-v1_20_r3</artifactId>
-            <version>${revision}</version>
-            <optional>true</optional> <!-- value will be true or false only -->
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.countercraft</groupId>
-            <artifactId>movecraft-v1_21</artifactId>
+            <artifactId>movecraft-v1_20</artifactId>
             <version>${revision}</version>
             <optional>false</optional> <!-- value will be true or false only -->
             <type>jar</type>
@@ -59,7 +52,14 @@
             <groupId>net.countercraft</groupId>
             <artifactId>movecraft-v1_21_3</artifactId>
             <version>${revision}</version>
-            <optional>true</optional> <!-- value will be true or false only -->
+            <optional>false</optional> <!-- value will be true or false only -->
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>net.countercraft</groupId>
+            <artifactId>movecraft-v1_21_4</artifactId>
+            <version>${revision}</version>
+            <optional>false</optional> <!-- value will be true or false only -->
             <type>jar</type>
         </dependency>
         <dependency>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -196,8 +196,8 @@
                                     <shadedPattern>net.countercraft.movecraft.libs.org.roaringbitmap</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.patheloper</pattern>
-                                    <shadedPattern>net.countercraft.movecraft.libs.org.patheloper</shadedPattern>
+                                    <pattern>de.metaphoriker</pattern>
+                                    <shadedPattern>net.countercraft.movecraft.libs.de.metaphoriker</shadedPattern>
                                 </relocation>
                             </relocations>
                             <minimizeJar>true</minimizeJar>
@@ -210,7 +210,7 @@
                                     </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>net.countercraft:movecraft-v1_20_r3</artifact>
+                                    <artifact>net.countercraft:movecraft-v1_20</artifact>
                                     <includes>
                                         <include>**</include>
                                     </includes>
@@ -228,6 +228,12 @@
                                     </includes>
                                 </filter>
                                 <filter>
+                                    <artifact>net.countercraft:movecraft-v1_21_4</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
                                     <artifact>net.countercraft:datapack</artifact>
                                     <includes>
                                         <include>**</include>
@@ -238,7 +244,6 @@
                                 <includes>
                                     <include>net.countercraft:movecraft*</include>
                                     <include>org.roaringbitmap:*</include>
-                                    <include>com.github.patheloper.pathetic:*</include>
                                     <include>it.unimi.dsi:fastutil*</include>
                                     <include>net.kyori:adventure*</include>
                                     <include>net.kyori:examination*</include>

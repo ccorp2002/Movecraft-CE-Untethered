@@ -1,13 +1,17 @@
 package net.countercraft.movecraft.processing.tasks.detection;
 
 import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.WorldHandler;
+import net.countercraft.movecraft.MovecraftLocation;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.NPCCraftImpl;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.SubCraft;
 import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.events.CraftDetectEvent;
+import net.countercraft.movecraft.events.CraftPilotEvent;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.WorldManager;
@@ -15,10 +19,20 @@ import net.countercraft.movecraft.processing.effects.Effect;
 import net.countercraft.movecraft.processing.functions.CraftSupplier;
 import net.countercraft.movecraft.processing.functions.DetectionPredicate;
 import net.countercraft.movecraft.processing.functions.Result;
-import net.countercraft.movecraft.processing.tasks.detection.validators.*;
+import net.countercraft.movecraft.processing.tasks.detection.validators.AllowedBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.DetectionBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.FlyBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.ForbiddenBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.ForbiddenSignStringValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.NameSignValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.PilotSignValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.SizeValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.InteriorBlockValidator;
+import net.countercraft.movecraft.processing.tasks.detection.validators.WaterContactValidator;
 import net.countercraft.movecraft.util.AtomicLocationSet;
 import net.countercraft.movecraft.util.CollectionUtils;
 import net.countercraft.movecraft.util.Tags;
+import net.countercraft.movecraft.util.hitboxes.BitMapSetHitBox;
 import net.countercraft.movecraft.util.hitboxes.BitmapHitBox;
 import net.countercraft.movecraft.util.hitboxes.MutableHitBox;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
@@ -27,14 +41,36 @@ import net.countercraft.movecraft.util.hitboxes.SolidHitBox;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -64,9 +100,7 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
             new NameSignValidator(),
             new PilotSignValidator()
     );
-    private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of(
-            new DetectionBlockValidator()
-        );
+    private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> COMPLETION_VALIDATORS = List.of();
     private static final List<DetectionPredicate<Map<Material, Deque<MovecraftLocation>>>> VISITED_VALIDATORS = List.of();
 
 
@@ -104,10 +138,11 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
         this.audience = audience;
         this.postDetection = postDetection;
     }
+
     private Effect detectInterior(Craft craft) {
         craft.setDataTag("origin_size",craft.getOrigBlockCount());
         craft.setDataTag("current_size",craft.getOrigBlockCount());
-        if (craft.isAutomated()) return () -> {};
+        if (craft instanceof NPCCraftImpl) return () -> {};
         if (craft.getOrigBlockCount() >= 125000) return () -> {};
         if (!craft.getType().getBoolProperty(CraftType.DETECT_INTERIOR)) return () -> {};
         final WorldHandler handler = Movecraft.getInstance().getWorldHandler();
@@ -137,6 +172,7 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
         for (HitBox hitBox : surfaces) {
             validExterior.addAll(hitBox.difference(craft.getHitBox()));
         }
+        //Check to see which locations in the from set are actually outside of the craft
 
         final SetHitBox visited = new SetHitBox();
         for (final MovecraftLocation location : validExterior) {
@@ -183,17 +219,22 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
                 }
             }
         }
-        craft.setTrackedMovecraftLocs("air",interiorSet);
-        ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
-        if (waterLine != -64 && waterLine != -128) return () -> {};
-        var waterData = Movecraft.getInstance().getWaterBlockData();
-        return () -> {
-            for (MovecraftLocation location : craft.getHitBox()) {
-                if (location.getY() <= waterLine) {
-                    craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+        if (craft.getHitBox().size()+(int)(craft.getHitBox().size()/1.25) >= interiorSet.size()) {
+            //interior.addAll(interiorSet);
+            craft.setTrackedMovecraftLocs("air",interiorSet);
+            ((MutableHitBox)craft.getHitBox()).addAll(interiorSet);
+            //craft.setHitBox(craft.getHitBox().union(interior));
+            if (waterLine != -64 && waterLine != -128) return () -> {};
+            var waterData = Movecraft.getInstance().getWaterBlockData();
+            return () -> {
+                for (MovecraftLocation location : craft.getHitBox()) {
+                    if (location.getY() <= waterLine) {
+                        craft.getPhaseBlocks().put(location.toBukkit(badWorld), waterData);
+                    }
                 }
-            }
-        };
+            };
+        }
+        return () -> {};
     }
 
     @NotNull
@@ -336,11 +377,11 @@ public class UnsafeDetectionTask implements Supplier<Effect> {
 
                 if(result.isSucess()) {
                     legal.add(probe);
-                    if(Tags.FLUID.contains(movecraftWorld.getMaterial(probe)))
+                    final Material mat = movecraftWorld.getMaterial(probe);
+                    if(Tags.FLUID.contains(mat))
                         fluid.add(probe);
-
                     size.increment();
-                    materials.computeIfAbsent(movecraftWorld.getMaterial(probe), Functions.forSupplier(ConcurrentLinkedDeque::new)).add(probe);
+                    materials.computeIfAbsent(mat, Functions.forSupplier(ConcurrentLinkedDeque::new)).add(probe);
                     for(MovecraftLocation shift : SHIFTS) {
                         var shifted = probe.add(shift);
                         if(visited.add(shifted))

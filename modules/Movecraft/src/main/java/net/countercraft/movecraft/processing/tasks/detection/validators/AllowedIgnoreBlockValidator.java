@@ -6,10 +6,12 @@ import net.countercraft.movecraft.processing.MovecraftWorld;
 import net.countercraft.movecraft.processing.functions.IgnoreDetectionPredicate;
 import net.countercraft.movecraft.processing.functions.Result;
 import org.bukkit.entity.Player;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class AllowedIgnoreBlockValidator implements IgnoreDetectionPredicate<MovecraftLocation> {
