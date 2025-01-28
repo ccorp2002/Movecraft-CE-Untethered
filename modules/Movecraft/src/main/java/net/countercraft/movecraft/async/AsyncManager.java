@@ -405,12 +405,6 @@ public class AsyncManager extends BukkitRunnable {
             if (craft.getHitBox().isEmpty() || craft.getHitBox() == null) {
                 CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
                 continue;
-            } if ((craft.getHitBox().getMinY() >= 720 || craft.getHitBox().getMinY() <= craft.getType().getIntProperty(CraftType.MIN_HEIGHT_LIMIT))) {
-                CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
-                continue;
-            } if (craft.getWorld().getName().toLowerCase().contains("void") || craft.getWorld().getName().toLowerCase().contains("space") || craft.getWorld().getName().toLowerCase().contains("sector") || craft.getWorld().getName().toLowerCase().contains("zone")) {
-                CraftManager.getInstance().release(craft, CraftReleaseEvent.Reason.SUNK, true);
-                continue;
             }
             if (craft.hasMovedWithin(craft.getType().getIntProperty(CraftType.SINK_RATE_TICKS))) continue;
 

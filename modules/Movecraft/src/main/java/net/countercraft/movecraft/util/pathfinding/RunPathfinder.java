@@ -113,7 +113,6 @@ public final class RunPathfinder
       y *= -1;
       z *= -1;
     }
-    //int length = MathUtils.getBoxLength(craft.getHitBox());
     if (craft.getBottomCenter().getY()+y >= 750) y = 0;
     else if (craft.getBottomCenter().getY()+y <= 250) y = 0;
     craft.translate(x,y,z);
